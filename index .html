@@ -1,0 +1,8800 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>TURNI POSTE NAPOLI</title>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f1f4f8;
+    color: #1f2937;
+}
+
+header {
+    background: linear-gradient(135deg,#0f172a,#1e3a8a);
+    color: white;
+    padding: 18px 20px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: 1px;
+}
+
+header p {
+    margin: 6px 0 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.controlli {
+    background: white;
+    padding: 15px;
+    margin: 15px auto;
+    max-width: 1400px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+
+.riga-controlli {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.riga-controlli:last-child {
+    margin-bottom: 0;
+}
+
+input[type="file"] {
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    background: #f8fafc;
+    max-width: 100%;
+}
+
+button {
+    border: none;
+    border-radius: 7px;
+    padding: 10px 14px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #2563eb;
+    color: white;
+    transition: transform 0.15s, opacity 0.15s;
+}
+
+button:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.btn-giorno {
+    background: #475569;
+}
+
+.btn-settimana {
+    background: #1d4ed8;
+}
+
+.btn-stampa {
+    background: #059669;
+}
+
+.btn-admin {
+    background: #7c3aed;
+}
+
+.btn-salva {
+    background: #059669;
+}
+
+.btn-richiesta {
+    background: #ea580c;
+}
+
+.btn-modifica {
+    background: #f59e0b;
+    color: #111827;
+}
+
+.btn-elimina {
+    background: #dc2626;
+}
+
+.btn-cambio {
+    background: #0891b2;
+}
+
+.btn-chiudi {
+    background: #64748b;
+}
+
+.admin-only {
+    display: none;
+}
+
+#stato {
+    max-width: 1400px;
+    margin: 10px auto;
+    padding: 10px 14px;
+    background: white;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    color: #334155;
+}
+
+#risultati {
+    max-width: 1400px;
+    margin: 15px auto 30px;
+    padding: 0 10px;
+}
+
+.giorno {
+    background: white;
+    border-radius: 14px;
+    margin-bottom: 18px;
+    overflow: hidden;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.10);
+}
+
+.giorno-titolo {
+    padding: 15px 18px;
+    background: linear-gradient(135deg,#1e3a8a,#2563eb);
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.postazione {
+    margin: 14px;
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.postazione-titolo {
+    background: #eaf1fb;
+    color: #1e3a8a;
+    padding: 10px 12px;
+    font-size: 17px;
+    font-weight: bold;
+    border-bottom: 1px solid #dbe3ef;
+}
+
+.turno {
+    display: grid;
+    grid-template-columns:
+        minmax(180px, 1fr)
+        90px
+        90px
+        80px
+        auto;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.turno:last-child {
+    border-bottom: none;
+}
+
+.turno-nome {
+    font-weight: bold;
+}
+
+.turno-ora {
+    text-align: center;
+    font-weight: bold;
+    background: #f8fafc;
+    border-radius: 6px;
+    padding: 6px;
+}
+
+.turno-ore {
+    text-align: center;
+    color: #475569;
+    font-weight: bold;
+}
+
+.turno-azioni {
+    display: flex;
+    gap: 5px;
+    justify-content: flex-end;
+}
+
+.turno-azioni button {
+    padding: 6px 8px;
+    font-size: 12px;
+}
+
+.assenze {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #fff7ed;
+    border-top: 1px solid #fed7aa;
+}
+
+.assenze-titolo {
+    font-weight: bold;
+    color: #9a3412;
+    margin-bottom: 7px;
+}
+
+.assente {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 5px 0;
+    border-bottom: 1px dashed #fed7aa;
+}
+
+.assente:last-child {
+    border-bottom: none;
+}
+
+.assente-nome {
+    font-weight: bold;
+}
+
+.assente-tipo {
+    font-weight: bold;
+    color: #c2410c;
+}
+
+.chiuso {
+    padding: 18px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #b91c1c;
+    background: #fef2f2;
+}
+
+.nessun-turno {
+    padding: 15px;
+    text-align: center;
+    color: #64748b;
+    font-style: italic;
+}
+
+.notifica {
+    display: inline-block;
+    background: #dc2626;
+    color: white;
+    border-radius: 20px;
+    padding: 3px 8px;
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+.cambio-segnale {
+    margin: 8px 14px;
+    padding: 8px 10px;
+    border-radius: 7px;
+    background: #ecfeff;
+    color: #155e75;
+    font-weight: bold;
+    border-left: 4px solid #0891b2;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15,23,42,0.65);
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+}
+
+.modal-box {
+    width: min(720px, 100%);
+    max-height: 92vh;
+    overflow-y: auto;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.30);
+}
+
+.modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: #1e3a8a;
+    color: white;
+}
+
+.modal-head h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.modal-head button {
+    background: transparent;
+    padding: 5px 8px;
+    font-size: 18px;
+}
+
+.modal-content {
+    padding: 18px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: #334155;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 9px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.form-group textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+.richiesta-card {
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #f8fafc;
+}
+
+.richiesta-card.in-attesa {
+    border-left: 5px solid #f59e0b;
+}
+
+.richiesta-card.approvata {
+    border-left: 5px solid #16a34a;
+}
+
+.richiesta-card.rifiutata {
+    border-left: 5px solid #dc2626;
+}
+
+.richiesta-card h3 {
+    margin: 0 0 8px;
+    color: #1e3a8a;
+}
+
+.richiesta-card p {
+    margin: 4px 0;
+}
+
+.btn-postazione {
+    background: #64748b;
+}
+
+.btn-postazione.attivo {
+    background: #0f172a;
+    outline: 3px solid #60a5fa;
+}
+
+@media (max-width: 700px) {
+
+    .turno {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .turno-nome {
+        grid-column: 1 / -1;
+    }
+
+    .turno-ore {
+        grid-column: 1 / -1;
+    }
+
+    .turno-azioni {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+    }
+
+    .giorno-titolo {
+        font-size: 17px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: auto;
+    }
+}
+
+@media print {
+
+    body {
+        background: white;
+    }
+
+    header {
+        box-shadow: none;
+        background: white;
+        color: black;
+        border-bottom: 2px solid black;
+    }
+
+    .controlli,
+    #stato {
+        display: none !important;
+    }
+
+    #risultati {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .giorno {
+        box-shadow: none;
+        border: 1px solid #999;
+        page-break-inside: avoid;
+    }
+
+    .postazione {
+        page-break-inside: avoid;
+    }
+
+    .giorno-titolo {
+        background: white;
+        color: black;
+        border-bottom: 1px solid black;
+    }
+
+    .postazione-titolo {
+        background: white;
+        color: black;
+    }
+
+    button,
+    .turno-azioni,
+    .cambio-segnale {
+        display: none !important;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+    <h1>TURNI POSTE NAPOLI</h1>
+
+    <p>
+        Visualizzazione turni del personale
+    </p>
+
+</header>
+
+<div id="schermataRuolo" class="controlli">
+
+    <div class="riga-controlli">
+
+        <button
+            id="btnRuoloOperatore"
+            class="btn-giorno">
+            👁 TURNI POSTAZIONI (SENZA PIN)
+        </button>
+
+        <button
+            id="btnLoginPin"
+            class="btn-cambio">
+            🔑 ACCEDI CON PIN (MIEI TURNI + RICHIESTE)
+        </button>
+
+        <button
+            id="btnRuoloAdmin"
+            class="btn-admin">
+            🔐 AMMINISTRATORE
+        </button>
+
+    </div>
+
+</div>
+
+<div id="areaApp" style="display:none;">
+
+<div class="controlli">
+
+    <div class="riga-controlli">
+
+        <button
+            id="btnCambiaRuolo"
+            class="btn-chiudi">
+            🏠 CAMBIA RUOLO
+        </button>
+
+    </div>
+
+    <div
+        id="rigaCaricaExcel"
+        class="riga-controlli admin-only">
+
+        <input
+            type="file"
+            id="fileExcel"
+            accept=".xlsx,.xls,.xlsm">
+
+        <button
+            id="btnCambiaPassword"
+            class="btn-admin">
+            🔑 CAMBIA PASSWORD
+        </button>
+
+    </div>
+
+    <div class="riga-controlli">
+
+        <button
+            id="btnSettimanaScorsa"
+            class="btn-settimana">
+            SETTIMANA SCORSA
+        </button>
+
+        <button
+            id="btnSettimana"
+            class="btn-settimana">
+            SETTIMANA
+        </button>
+
+        <button
+            id="btnSettimanaProssima"
+            class="btn-settimana">
+            SETTIMANA PROSSIMA
+        </button>
+
+    </div>
+
+    <div class="riga-controlli">
+
+        <button
+            id="btnIeri"
+            class="btn-giorno">
+            IERI
+        </button>
+
+        <button
+            id="btnOggi"
+            class="btn-giorno">
+            OGGI
+        </button>
+
+        <button
+            id="btnDomani"
+            class="btn-giorno">
+            DOMANI
+        </button>
+
+        <button
+            id="btnStampa"
+            class="btn-stampa">
+            🖨 STAMPA TURNI
+        </button>
+
+        <button
+            id="btnPdf"
+            class="btn-stampa"
+            style="background:#b91c1c;">
+            📄 SCARICA PDF
+        </button>
+
+    </div>
+
+    <div class="riga-controlli">
+        <button id="btnMeseScorso" class="btn-settimana">MESE SCORSO</button>
+        <button id="btnMese" class="btn-settimana">📅 MESE</button>
+        <button id="btnMeseProssimo" class="btn-settimana">MESE PROSSIMO</button>
+    </div>
+
+    <div id="rigaOperatoreFiltro" class="riga-controlli">
+        <select id="selOperatoreFiltro" style="padding:9px; border-radius:7px; border:1px solid #cbd5e1; font-weight:bold; max-width:100%;"></select>
+    </div>
+
+    <div id="rigaPostazioni" class="riga-controlli"></div>
+
+    <div
+        id="rigaRichiesteOperatore"
+        class="riga-controlli">
+
+        <button
+            id="btnFerie"
+            class="btn-richiesta">
+            🏖 RICHIESTA FERIE
+        </button>
+
+        <button
+            id="btn104"
+            class="btn-richiesta">
+            📋 RICHIESTA 104
+        </button>
+
+        <button
+            id="btnMalattia"
+            class="btn-richiesta">
+            🤒 RICHIESTA MALATTIA
+        </button>
+
+        <button
+            id="btnAltraAssenza"
+            class="btn-richiesta">
+            📝 ALTRA ASSENZA
+        </button>
+
+        <button
+            id="btnCambioRichiesta"
+            class="btn-cambio">
+            🔄 RICHIESTA CAMBIO TURNO
+        </button>
+
+    </div>
+
+    <div
+        id="controlliAdmin"
+        class="riga-controlli admin-only">
+
+        <button
+            id="btnSalva"
+            class="btn-salva">
+            💾 SALVA
+        </button>
+
+        <button
+            id="btnAggiungi"
+            class="btn-admin">
+            ➕ AGGIUNGI TURNO
+        </button>
+
+        <button
+            id="btnCambioAdmin"
+            class="btn-cambio">
+            🔄 CAMBIO TURNO
+        </button>
+
+        <button
+            id="btnGestisciPin"
+            class="btn-admin">
+            👥 GESTISCI PIN OPERATORI
+        </button>
+
+        <button
+            id="btnEsciAdmin"
+            class="btn-chiudi">
+            🔒 ESCI AMMINISTRATORE
+        </button>
+
+    </div>
+
+    <div
+        id="rigaRichiesteAdmin"
+        class="riga-controlli admin-only">
+
+        <button
+            id="btnRichiesteFerie"
+            class="btn-admin">
+            🏖 FERIE <span id="numFerie"></span>
+        </button>
+
+        <button
+            id="btnRichieste104"
+            class="btn-admin">
+            📋 104 <span id="num104"></span>
+        </button>
+
+        <button
+            id="btnRichiesteMalattia"
+            class="btn-admin">
+            🤒 MALATTIA <span id="numMalattia"></span>
+        </button>
+
+        <button
+            id="btnRichiesteAltro"
+            class="btn-admin">
+            📝 ALTRE ASSENZE <span id="numAltro"></span>
+        </button>
+
+        <button
+            id="btnRichiesteCambio"
+            class="btn-admin">
+            🔔 CAMBI TURNO <span id="numCambio"></span>
+        </button>
+
+    </div>
+
+</div>
+
+<div
+    id="badgeOperatore"
+    style="display:none; max-width:1400px; margin:10px auto 0; padding:8px 14px; background:#0891b2; color:white; border-radius:8px; text-align:center; font-weight:bold;">
+</div>
+
+<div id="stato">
+    Seleziona il file Excel dei turni.
+</div>
+
+<div id="risultati"></div>
+
+</div>
+
+<div id="modal" class="modal">
+
+    <div class="modal-box">
+
+        <div class="modal-head">
+
+            <h2 id="modalTitolo">
+                MODULO
+            </h2>
+
+            <button
+                type="button"
+                onclick="chiudiModal()">
+                ✕
+            </button>
+
+        </div>
+
+        <div
+            id="modalContenuto"
+            class="modal-content">
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+/* ============================================================
+   VARIABILI GLOBALI
+   ============================================================ */
+
+let turni = {};
+
+let chiusure = {};
+
+let assenze = {};
+
+let richieste = [];
+
+let fileCaricato = false;
+
+let workbookCaricato = null;
+
+let nomeFileOriginale = "";
+
+let amministratore = false;
+
+let ruolo = null;
+
+let modalita = "settimana";
+
+let offsetSettimana = 0;
+
+let offsetGiorno = 0;
+
+let operatoreCorrente = null;
+
+let modalitaPersonale = false;
+
+let filtroPostazione = "tutte";
+
+let filtroOperatore = "tutti";
+
+let offsetMese = 0;
+
+const PASSWORD_AMMINISTRATORE = "1234";
+
+/* Indirizzo online dell'Excel dei turni (es. GitHub).
+   Se vuoto, l'app legge turni.xlsx dalla cartella del sito. */
+const URL_TURNI_ONLINE = "https://docs.google.com/spreadsheets/d/1M1ZR4m955y3CyJMdnwQ05B43kVYiyCypQ8fE3PJY7Ho/export?format=xlsx";
+
+/* false = l'app legge SOLO i fogli "delGGMMAAAA" (consigliato).
+   true  = usa anche i fogli APP_TURNI / APP_ASSENZE salvati in passato,
+   che sostituirebbero i turni originali. */
+const USA_SALVATAGGI_APP = false;
+
+const origini = {};
+
+/* Indirizzo online di operatori.json (facoltativo). */
+const URL_OPERATORI_ONLINE = "";
+
+const CHIAVE_OPERATORI =
+    "turni_poste_napoli_operatori_pin_v1";
+
+const CHIAVE_PDF_OPERATORI =
+    "turni_poste_napoli_pdf_operatori_v1";
+
+const CHIAVE_RICHIESTE =
+    "turni_poste_napoli_richieste_v1";
+
+const CHIAVE_VISUALIZZAZIONE =
+    "turni_poste_napoli_visualizzazione_v1";
+
+const CHIAVE_DATI =
+    "turni_poste_napoli_dati_v1";
+
+const CHIAVE_PASSWORD =
+    "turni_poste_napoli_password_v1";
+
+
+/* ============================================================
+   POSTAZIONI
+   ============================================================ */
+
+const postazioni = [
+
+    {
+        id: "matteotti",
+        nome: "Poste Napoli Piazza Matteotti",
+        prima: 0,
+        ultima: 5
+    },
+
+    {
+        id: "monteoliveto",
+        nome: "Poste Napoli Piazza Monteoliveto",
+        prima: 7,
+        ultima: 12
+    },
+
+    {
+        id: "ferraris",
+        nome: "Poste Napoli Via Galileo Ferraris",
+        prima: 14,
+        ultima: 19
+    },
+
+    {
+        id: "lucci",
+        nome: "Poste Napoli Arnaldo Lucci",
+        prima: 21,
+        ultima: 26
+    }
+
+];
+
+
+/* ============================================================
+   UTILITÀ
+   ============================================================ */
+
+function generaIdTurno() {
+
+    return "APP_" +
+        Date.now() +
+        "_" +
+        Math.random()
+            .toString(36)
+            .substring(2,9);
+
+}
+
+
+function escapeHtml(valore) {
+
+    return String(valore ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+function dataArchivio(valore) {
+
+    const s = testo(valore);
+
+    if (
+        /^\d{4}-\d{2}-\d{2}$/.test(s)
+    ) {
+        return s;
+    }
+
+    return leggiData(s);
+
+}
+
+
+function postazionePerId(id) {
+
+    return postazioni.find(
+        function(p) {
+            return p.id === id;
+        }
+    );
+
+}
+
+
+/* ============================================================
+   DATA DAL NOME DEL FOGLIO
+   ESEMPIO: del27092026
+   ============================================================ */
+
+function dataDaNomeFoglio(nomeFoglio) {
+
+    const m =
+        String(nomeFoglio)
+            .match(
+                /^del(\d{2})(\d{2})(\d{4})/i
+            );
+
+    if (!m) {
+        return null;
+    }
+
+    const d =
+        new Date(
+            parseInt(m[3],10),
+            parseInt(m[2],10) - 1,
+            parseInt(m[1],10)
+        );
+
+    if (isNaN(d.getTime())) {
+        return null;
+    }
+
+    return formatData(d);
+
+}
+
+
+/* ============================================================
+   CARICAMENTO EXCEL
+   ============================================================ */
+
+document
+    .getElementById("fileExcel")
+    .addEventListener(
+        "change",
+        caricaExcel
+    );
+
+
+function caricaExcel(event) {
+
+    const file =
+        event.target.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    const stato =
+        document.getElementById("stato");
+
+    stato.textContent =
+        "Caricamento del file in corso...";
+
+    const reader =
+        new FileReader();
+
+    reader.onload =
+        function(e) {
+
+            try {
+
+                const datiFile =
+                    new Uint8Array(
+                        e.target.result
+                    );
+
+                const workbook =
+                    XLSX.read(
+                        datiFile,
+                        {
+                            type: "array",
+                            cellDates: false,
+                            raw: true
+                        }
+                    );
+
+                workbookCaricato =
+                    workbook;
+
+                nomeFileOriginale =
+                    file.name;
+
+                turni = {};
+                chiusure = {};
+                assenze = {};
+
+                fileCaricato = false;
+
+                let numeroFogli = 0;
+
+                let numeroTurni = 0;
+
+                workbook.SheetNames.forEach(
+                    function(nomeFoglio) {
+
+                        if (
+                            !/^del\d{8}/i
+                                .test(nomeFoglio)
+                        ) {
+                            return;
+                        }
+
+                        const ws =
+                            workbook.Sheets[
+                                nomeFoglio
+                            ];
+
+                        if (!ws) {
+                            return;
+                        }
+
+                        const dati =
+                            XLSX.utils.sheet_to_json(
+                                ws,
+                                {
+                                    header: 1,
+                                    defval: "",
+                                    raw: true
+                                }
+                            );
+
+                        if (
+                            !dati ||
+                            !dati.length
+                        ) {
+                            return;
+                        }
+
+                        numeroFogli++;
+
+                        leggiFoglio(
+                            dati,
+                            nomeFoglio
+                        );
+
+                    }
+                );
+
+
+                /* ---------------------------------------------
+                   CARICA EVENTUALI MODIFICHE GIÀ SALVATE
+                   --------------------------------------------- */
+
+                caricaTurniSalvati(
+                    workbook
+                );
+
+                caricaAssenzeSalvate(
+                    workbook
+                );
+
+                caricaRichiesteSalvate(workbook);
+                caricaOperatoriEPdfDalWorkbook(workbook);
+
+
+                Object.keys(turni)
+                    .forEach(
+                        function(data) {
+
+                            const giorno =
+                                turni[data];
+
+                            Object.keys(giorno)
+                                .forEach(
+                                    function(id) {
+
+                                        numeroTurni +=
+                                            giorno[id].length;
+
+                                    }
+                                );
+
+                        }
+                    );
+
+
+                fileCaricato = true;
+
+
+                stato.textContent =
+                    "File caricato correttamente. " +
+                    numeroFogli +
+                    " fogli elaborati - " +
+                    numeroTurni +
+                    " turni caricati." +
+                    (origini["turni.xlsx"] ? " Fonte: " + origini["turni.xlsx"] + "." : "");
+
+
+                salvaDatiLocali();
+
+                caricaVisualizzazioneSalvata();
+
+                aggiornaContatoriRichieste();
+
+                visualizza();
+
+            }
+            catch (errore) {
+
+                console.error(errore);
+
+                stato.textContent =
+                    "ERRORE durante il caricamento del file Excel.";
+
+                alert(
+                    "Errore nella lettura del file Excel.\n\n" +
+                    errore.message
+                );
+
+            }
+
+        };
+
+
+    reader.onerror =
+        function() {
+
+            stato.textContent =
+                "Errore nella lettura del file.";
+
+        };
+
+
+    reader.readAsArrayBuffer(file);
+
+}
+
+
+/* ============================================================
+   LEGGI FOGLIO
+   ============================================================ */
+
+function leggiFoglio(
+    dati,
+    nomeFoglio
+) {
+
+    const dataFoglio =
+        dataDaNomeFoglio(nomeFoglio);
+
+    for (
+        let i = 0;
+        i < postazioni.length;
+        i++
+    ) {
+
+        leggiPostazione(
+            dati,
+            postazioni[i],
+            dataFoglio
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   LEGGI POSTAZIONE
+   ============================================================ */
+
+function leggiPostazione(
+    dati,
+    postazione,
+    dataFoglio
+) {
+
+    /*
+       IMPORTANTE:
+       Se il foglio è del27092026, la data viene
+       comunque assegnata anche se nella riga Matteotti
+       la data non è presente nelle colonne A:F.
+
+       Questa è la correzione della domenica Matteotti.
+    */
+
+    let dataCorrente =
+        dataFoglio || null;
+
+
+    for (
+        let r = 0;
+        r < dati.length;
+        r++
+    ) {
+
+        const riga =
+            dati[r] || [];
+
+
+        /* ====================================================
+           CERCA DATA
+           ==================================================== */
+
+        let nuovaData = null;
+
+        for (
+            let c = postazione.prima;
+            c <= postazione.ultima;
+            c++
+        ) {
+
+            const valore =
+                testo(riga[c]);
+
+            const dataTrovata =
+                leggiData(valore);
+
+            if (dataTrovata) {
+
+                nuovaData =
+                    dataTrovata;
+
+                break;
+
+            }
+
+        }
+
+
+        if (nuovaData) {
+
+            dataCorrente =
+                nuovaData;
+
+        }
+
+
+        if (!dataCorrente) {
+            continue;
+        }
+
+
+        /* ====================================================
+           ASSENZE
+           ==================================================== */
+
+        let noteAssenza = [];
+
+
+        for (
+            let c = postazione.prima;
+            c <= postazione.ultima;
+            c++
+        ) {
+
+            const valore =
+                testo(riga[c]);
+
+
+            if (!valore) {
+                continue;
+            }
+
+
+            const valoreNorm =
+                normalizza(valore);
+
+
+            if (
+                leggiData(valore)
+            ) {
+                continue;
+            }
+
+
+            if (
+                leggiOra(valore)
+            ) {
+                continue;
+            }
+
+
+            if (
+                valoreNorm === "TOTALE" ||
+                valoreNorm.indexOf(
+                    "TOTALE "
+                ) === 0
+            ) {
+
+                continue;
+
+            }
+
+
+            if (
+                valoreNorm ===
+                "SITO CHIUSO"
+            ) {
+
+                continue;
+
+            }
+
+
+            /*
+               CORREZIONE IMPORTANTE:
+               ora vengono riconosciute anche celle
+               che contengono ESATTAMENTE FERIE,
+               RIPOSO, MALATTIA o 104.
+            */
+
+            const contieneAssenza =
+                /\bFERIE\b|\bRIPOSO\b|\bMALATTIA\b|\b104\b|\bLEGGE\s*104\b/i
+                    .test(valoreNorm);
+
+
+            if (!contieneAssenza) {
+                continue;
+            }
+
+
+            const parti =
+                valore.split(",");
+
+
+            for (
+                let p = 0;
+                p < parti.length;
+                p++
+            ) {
+
+                let nota =
+                    testo(
+                        parti[p]
+                    );
+
+
+                if (!nota) {
+                    continue;
+                }
+
+
+                const notaNorm =
+                    normalizza(nota);
+
+
+                let tipo = "";
+
+
+                if (
+                    notaNorm.indexOf(
+                        "FERIE"
+                    ) !== -1
+                ) {
+
+                    tipo = "FERIE";
+
+                }
+
+                else if (
+                    notaNorm.indexOf(
+                        "RIPOSO"
+                    ) !== -1
+                ) {
+
+                    tipo = "RIPOSO";
+
+                }
+
+                else if (
+                    notaNorm.indexOf(
+                        "MALATTIA"
+                    ) !== -1
+                ) {
+
+                    tipo = "MALATTIA";
+
+                }
+
+                else if (
+                    notaNorm.indexOf(
+                        "LEGGE 104"
+                    ) !== -1 ||
+                    notaNorm.indexOf(
+                        "104"
+                    ) !== -1
+                ) {
+
+                    tipo = "104";
+
+                }
+
+
+                if (!tipo) {
+                    continue;
+                }
+
+
+                let nomeAssente =
+                    nota;
+
+
+                nomeAssente =
+                    nomeAssente
+                        .replace(
+                            /\bLEGGE\s*104\b/ig,
+                            ""
+                        )
+                        .replace(
+                            /\bFERIE\b/ig,
+                            ""
+                        )
+                        .replace(
+                            /\bRIPOSO\b/ig,
+                            ""
+                        )
+                        .replace(
+                            /\bMALATTIA\b/ig,
+                            ""
+                        )
+                        .replace(
+                            /\b104\b/ig,
+                            ""
+                        )
+                        .trim();
+
+
+                nomeAssente =
+                    nomeAssente
+                        .replace(
+                            /\s+/g,
+                            " "
+                        )
+                        .trim();
+
+
+                if (nomeAssente) {
+
+                    noteAssenza.push({
+
+                        nome:
+                            nomeAssente,
+
+                        tipo:
+                            tipo
+
+                    });
+
+                }
+
+            }
+
+        }
+
+
+        /* ====================================================
+           SALVA ASSENZE
+           ==================================================== */
+
+        if (
+            noteAssenza.length > 0
+        ) {
+
+            if (
+                !assenze[dataCorrente]
+            ) {
+
+                assenze[dataCorrente] =
+                    {};
+
+            }
+
+
+            if (
+                !assenze[dataCorrente]
+                    [postazione.id]
+            ) {
+
+                assenze[dataCorrente]
+                    [postazione.id] = [];
+
+            }
+
+
+            for (
+                let a = 0;
+                a < noteAssenza.length;
+                a++
+            ) {
+
+                const assenza =
+                    noteAssenza[a];
+
+
+                const giaPresente =
+                    assenze[dataCorrente]
+                        [postazione.id]
+                        .some(
+                            function(x) {
+
+                                return (
+
+                                    normalizza(
+                                        x.nome
+                                    ) ===
+                                    normalizza(
+                                        assenza.nome
+                                    )
+
+                                    &&
+
+                                    normalizza(
+                                        x.tipo
+                                    ) ===
+                                    normalizza(
+                                        assenza.tipo
+                                    )
+
+                                );
+
+                            }
+                        );
+
+
+                if (
+                    !giaPresente
+                ) {
+
+                    assenze[dataCorrente]
+                        [postazione.id]
+                        .push(
+                            assenza
+                        );
+
+                }
+
+            }
+
+        }
+
+
+        /* ====================================================
+           SITO CHIUSO
+           ==================================================== */
+
+        let sitoChiuso = false;
+
+        for (
+            let c = postazione.prima;
+            c <= postazione.ultima;
+            c++
+        ) {
+
+            const valore =
+                normalizza(
+                    riga[c]
+                );
+
+            if (
+                valore ===
+                "SITO CHIUSO"
+            ) {
+
+                sitoChiuso = true;
+
+                break;
+
+            }
+
+        }
+
+
+        if (sitoChiuso) {
+
+            if (
+                !chiusure[dataCorrente]
+            ) {
+
+                chiusure[dataCorrente] =
+                    {};
+
+            }
+
+
+            chiusure[dataCorrente]
+                [postazione.id] = true;
+
+
+            if (
+                turni[dataCorrente] &&
+                turni[dataCorrente]
+                    [postazione.id]
+            ) {
+
+                turni[dataCorrente]
+                    [postazione.id] = [];
+
+            }
+
+
+            continue;
+
+        }
+
+
+        if (
+            chiusure[dataCorrente] &&
+            chiusure[dataCorrente]
+                [postazione.id]
+        ) {
+
+            continue;
+
+        }
+
+
+        /* ====================================================
+           ENTRATA / USCITA
+           ==================================================== */
+
+        let indiceEntrata = -1;
+
+        let indiceUscita = -1;
+
+        let entrata = null;
+
+        let uscita = null;
+
+
+        for (
+            let c = postazione.prima;
+            c <= postazione.ultima;
+            c++
+        ) {
+
+            const ora =
+                leggiOra(
+                    riga[c]
+                );
+
+
+            if (ora) {
+
+                if (
+                    indiceEntrata === -1
+                ) {
+
+                    indiceEntrata = c;
+
+                    entrata = ora;
+
+                }
+
+                else if (
+                    indiceUscita === -1
+                ) {
+
+                    indiceUscita = c;
+
+                    uscita = ora;
+
+                }
+
+            }
+
+        }
+
+
+
+
+        /* ====================================================
+           SE NON CI SONO DUE ORARI
+           ==================================================== */
+
+        if (
+            indiceEntrata === -1 ||
+            indiceUscita === -1
+        ) {
+
+            continue;
+
+        }
+
+
+        /* ====================================================
+           CERCA NOME
+           ==================================================== */
+
+        let nome = "";
+
+
+        for (
+            let c = postazione.prima;
+            c < indiceEntrata;
+            c++
+        ) {
+
+            const valore =
+                testo(riga[c]);
+
+
+            if (!valore) {
+                continue;
+            }
+
+
+            if (
+                leggiData(valore)
+            ) {
+                continue;
+            }
+
+
+            const valoreNorm =
+                normalizza(
+                    valore
+                );
+
+
+            if (
+                valoreNorm ===
+                "TOTALE" ||
+
+                valoreNorm.indexOf(
+                    "TOTALE "
+                ) === 0
+            ) {
+
+                continue;
+
+            }
+
+
+            if (
+                valoreNorm ===
+                "RIPOSO" ||
+
+                valoreNorm ===
+                "FERIE" ||
+
+                valoreNorm ===
+                "MALATTIA" ||
+
+                valoreNorm ===
+                "104" ||
+
+                valoreNorm ===
+                "LEGGE 104"
+            ) {
+
+                continue;
+
+            }
+
+
+            if (!nome) {
+
+                nome = valore;
+
+            }
+
+            else {
+
+                nome +=
+                    " " + valore;
+
+            }
+
+        }
+
+
+        nome =
+            testo(nome);
+
+
+        if (!nome) {
+            continue;
+        }
+
+
+        const nomeNorm =
+            normalizza(nome);
+
+
+        if (
+            nomeNorm ===
+            "RIPOSO" ||
+
+            nomeNorm ===
+            "FERIE" ||
+
+            nomeNorm ===
+            "MALATTIA" ||
+
+            nomeNorm ===
+            "104" ||
+
+            nomeNorm ===
+            "LEGGE 104" ||
+
+            nomeNorm ===
+            "TOTALE"
+        ) {
+
+            continue;
+
+        }
+
+
+        if (
+            entrata === "00:00" &&
+            uscita === "00:00"
+        ) {
+
+            continue;
+
+        }
+
+
+        /* ====================================================
+           ORE
+           ==================================================== */
+
+        let ore = null;
+
+
+        for (
+            let c = indiceUscita + 1;
+            c <= postazione.ultima;
+            c++
+        ) {
+
+            const possibileOre =
+                leggiOra(
+                    riga[c]
+                );
+
+
+            if (
+                possibileOre
+            ) {
+
+                ore =
+                    possibileOre;
+
+                break;
+
+            }
+
+        }
+
+
+        if (!ore) {
+
+            ore =
+                calcolaOre(
+                    entrata,
+                    uscita
+                );
+
+        }
+
+
+        /* ====================================================
+           CREA STRUTTURA
+           ==================================================== */
+
+        if (
+            !turni[dataCorrente]
+        ) {
+
+            turni[dataCorrente] =
+                {};
+
+        }
+
+
+        if (
+            !turni[dataCorrente]
+                [postazione.id]
+        ) {
+
+            turni[dataCorrente]
+                [postazione.id] = [];
+
+        }
+
+
+        const lista =
+            turni[dataCorrente]
+                [postazione.id];
+
+
+        const duplicato =
+            lista.some(
+                function(t) {
+
+                    return (
+
+                        normalizza(
+                            t.nome
+                        ) ===
+                        normalizza(
+                            nome
+                        )
+
+                        &&
+
+                        t.entrata ===
+                        entrata
+
+                        &&
+
+                        t.uscita ===
+                        uscita
+
+                    );
+
+                }
+            );
+
+
+        if (
+            duplicato
+        ) {
+
+            continue;
+
+        }
+
+
+        lista.push({
+
+            id:
+                "SRC_" +
+                dataCorrente +
+                "_" +
+                postazione.id +
+                "_" +
+                r +
+                "_" +
+                indiceEntrata,
+
+            nome:
+                nome,
+
+            entrata:
+                entrata,
+
+            uscita:
+                uscita,
+
+            ore:
+                ore
+
+        });
+
+    }
+
+}
+
+
+/* ============================================================
+   CARICA TURNI SALVATI
+   ============================================================ */
+
+function caricaTurniSalvati(workbook) {
+
+    if (!USA_SALVATAGGI_APP) { return; }
+
+    const ws =
+        workbook.Sheets[
+            "APP_TURNI"
+        ];
+
+    if (!ws) {
+        return;
+    }
+
+
+    const dati =
+        XLSX.utils.sheet_to_json(
+            ws,
+            {
+                defval: "",
+                raw: false
+            }
+        );
+
+
+    if (!dati.length) {
+        return;
+    }
+
+
+    /*
+       Se esiste APP_TURNI significa che quello è
+       lo stato modificato dall'amministratore.
+    */
+
+    turni = {};
+
+
+    dati.forEach(
+        function(riga) {
+
+            const data =
+                dataArchivio(
+                    riga.DATA
+                );
+
+            if (!data) {
+                return;
+            }
+
+
+            const postazione =
+                testo(
+                    riga.POSTAZIONE
+                );
+
+
+            if (!postazione) {
+                return;
+            }
+
+
+            if (!turni[data]) {
+                turni[data] = {};
+            }
+
+
+            if (!turni[data][postazione]) {
+                turni[data][postazione] = [];
+            }
+
+
+            turni[data][postazione]
+                .push({
+
+                    id:
+                        testo(
+                            riga.ID
+                        ) ||
+                        generaIdTurno(),
+
+                    nome:
+                        testo(
+                            riga.NOME
+                        ),
+
+                    entrata:
+                        testo(
+                            riga.ENTRATA
+                        ),
+
+                    uscita:
+                        testo(
+                            riga.USCITA
+                        ),
+
+                    ore:
+                        testo(
+                            riga.ORE
+                        )
+
+                });
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   CARICA ASSENZE SALVATE
+   ============================================================ */
+
+function caricaAssenzeSalvate(workbook) {
+
+    if (!USA_SALVATAGGI_APP) { return; }
+
+    const ws =
+        workbook.Sheets[
+            "APP_ASSENZE"
+        ];
+
+    if (!ws) {
+        return;
+    }
+
+
+    const dati =
+        XLSX.utils.sheet_to_json(
+            ws,
+            {
+                defval: "",
+                raw: false
+            }
+        );
+
+
+    if (!dati.length) {
+        return;
+    }
+
+
+    assenze = {};
+
+
+    dati.forEach(
+        function(riga) {
+
+            const data =
+                dataArchivio(
+                    riga.DATA
+                );
+
+            if (!data) {
+                return;
+            }
+
+
+            const postazione =
+                testo(
+                    riga.POSTAZIONE
+                );
+
+
+            if (!assenze[data]) {
+                assenze[data] = {};
+            }
+
+
+            if (
+                !assenze[data][postazione]
+            ) {
+
+                assenze[data][postazione] =
+                    [];
+
+            }
+
+
+            assenze[data][postazione]
+                .push({
+
+                    nome:
+                        testo(
+                            riga.NOME
+                        ),
+
+                    tipo:
+                        testo(
+                            riga.TIPO
+                        )
+
+                });
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   CARICA RICHIESTE
+   ============================================================ */
+
+function caricaRichiesteSalvate(workbook) {
+
+    richieste = [];
+
+
+    const ws =
+        workbook.Sheets[
+            "APP_RICHIESTE"
+        ];
+
+
+    if (ws) {
+
+        const dati =
+            XLSX.utils.sheet_to_json(
+                ws,
+                {
+                    defval: "",
+                    raw: false
+                }
+            );
+
+
+        dati.forEach(
+            function(riga) {
+
+                richieste.push({
+
+                    id:
+                        testo(riga.ID) ||
+                        generaIdTurno(),
+
+                    tipo:
+                        testo(riga.TIPO),
+
+                    operatore:
+                        testo(riga.OPERATORE),
+
+                    data:
+                        testo(riga.DATA),
+
+                    dal:
+                        testo(riga.DAL),
+
+                    al:
+                        testo(riga.AL),
+
+                    postazione:
+                        testo(riga.POSTAZIONE),
+
+                    turno:
+                        testo(riga.TURNO),
+
+                    destinatario:
+                        testo(riga.DESTINATARIO),
+
+                    turnoDestinazione:
+                        testo(riga.TURNO_DESTINAZIONE),
+
+                    turnoId:
+                        testo(riga.TURNO_ID),
+
+                    turnoDestId:
+                        testo(riga.TURNO_DEST_ID),
+
+                    note:
+                        testo(riga.NOTE),
+
+                    stato:
+                        testo(riga.STATO) ||
+                        "IN ATTESA",
+
+                    dataRichiesta:
+                        testo(
+                            riga.DATA_RICHIESTA
+                        )
+
+                });
+
+            }
+        );
+
+    }
+
+
+    try {
+
+        const locali =
+            JSON.parse(
+                localStorage.getItem(
+                    CHIAVE_RICHIESTE
+                ) || "[]"
+            );
+
+
+        locali.forEach(
+            function(r) {
+
+                const esiste =
+                    richieste.some(
+                        function(x) {
+                            return x.id === r.id;
+                        }
+                    );
+
+                if (!esiste) {
+                    richieste.push(r);
+                }
+
+            }
+        );
+
+    }
+    catch(e) {
+
+        console.warn(
+            "Impossibile leggere le richieste locali.",
+            e
+        );
+
+    }
+
+
+    salvaRichiesteLocali();
+
+}
+
+
+/* ============================================================
+   SALVA RICHIESTE LOCALMENTE
+   ============================================================ */
+
+function salvaRichiesteLocali() {
+
+    try {
+
+        localStorage.setItem(
+            CHIAVE_RICHIESTE,
+            JSON.stringify(
+                richieste
+            )
+        );
+
+    }
+    catch(e) {
+
+        console.warn(
+            "Impossibile salvare richieste locali.",
+            e
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   VISUALIZZAZIONE SALVATA
+   ============================================================ */
+
+function salvaVisualizzazione() {
+
+    try {
+
+        localStorage.setItem(
+            CHIAVE_VISUALIZZAZIONE,
+            JSON.stringify({
+
+                modalita:
+                    modalita,
+
+                offsetSettimana:
+                    offsetSettimana,
+
+                offsetGiorno:
+                    offsetGiorno,
+
+                filtroPostazione:
+                    filtroPostazione
+
+            })
+        );
+
+    }
+    catch(e) {}
+
+}
+
+
+function caricaVisualizzazioneSalvata() {
+
+    try {
+
+        const dati =
+            JSON.parse(
+                localStorage.getItem(
+                    CHIAVE_VISUALIZZAZIONE
+                ) || "null"
+            );
+
+
+        if (!dati) {
+            return;
+        }
+
+
+        /*
+           L'operatore non può andare oltre
+           la settimana precedente o successiva.
+        */
+
+        modalita =
+            ["giorno", "mese"].indexOf(dati.modalita) !== -1
+                ? dati.modalita
+                : "settimana";
+
+
+        offsetSettimana =
+            Math.max(
+                -1,
+                Math.min(
+                    1,
+                    Number(
+                        dati.offsetSettimana
+                    ) || 0
+                )
+            );
+
+
+        offsetGiorno =
+            Math.max(
+                -1,
+                Math.min(
+                    1,
+                    Number(
+                        dati.offsetGiorno
+                    ) || 0
+                )
+            );
+
+
+        filtroPostazione =
+            postazioni.some(function(p) { return p.id === dati.filtroPostazione; })
+                ? dati.filtroPostazione
+                : "tutte";
+
+    }
+    catch(e) {}
+
+}
+
+
+/* ============================================================
+   GESTIONE RUOLO (OPERATORE / AMMINISTRATORE)
+   ============================================================ */
+
+function mostraSchermataRuolo() {
+
+    ruolo = null;
+
+    amministratore = false;
+
+    operatoreCorrente = null;
+
+    modalitaPersonale = false;
+
+    document.getElementById(
+        "badgeOperatore"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "schermataRuolo"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "areaApp"
+    ).style.display =
+        "none";
+
+}
+
+
+function entraComeOperatore() {
+
+    operatoreCorrente = null;
+
+    modalitaPersonale = false;
+
+    document.getElementById(
+        "badgeOperatore"
+    ).style.display =
+        "none";
+
+    const bottoneEsistente =
+        document.getElementById(
+            "btnMioPdf"
+        );
+
+    if (bottoneEsistente) {
+
+        bottoneEsistente.remove();
+
+    }
+
+    avviaSessioneOperatore();
+
+}
+
+
+function avviaSessioneOperatore() {
+
+    ruolo = "operatore";
+
+    amministratore = false;
+
+
+    document.getElementById(
+        "schermataRuolo"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "areaApp"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "rigaCaricaExcel"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "controlliAdmin"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "rigaRichiesteAdmin"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "rigaRichiesteOperatore"
+    ).style.display =
+        (modalitaPersonale ? "flex" : "none");
+
+
+    caricaDatiLocali();
+
+    caricaVisualizzazioneSalvata();
+
+    aggiornaContatoriRichieste();
+
+    visualizza();
+
+}
+
+
+function entraComeAmministratore() {
+
+    const password =
+        prompt(
+            "PASSWORD AMMINISTRATORE:"
+        );
+
+
+    if (
+        password === null
+    ) {
+        return;
+    }
+
+
+    if (
+        password !==
+        getPasswordCorrente()
+    ) {
+
+        alert(
+            "PASSWORD ERRATA."
+        );
+
+        return;
+
+    }
+
+
+    ruolo = "admin";
+
+    amministratore = true;
+
+
+    document.getElementById(
+        "schermataRuolo"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "areaApp"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "rigaCaricaExcel"
+    ).style.display =
+        "flex";
+
+
+    document.getElementById(
+        "controlliAdmin"
+    ).style.display =
+        "flex";
+
+
+    document.getElementById(
+        "rigaRichiesteAdmin"
+    ).style.display =
+        "flex";
+
+
+    document.getElementById(
+        "rigaRichiesteOperatore"
+    ).style.display =
+        "none";
+
+
+    caricaDatiLocali();
+
+    caricaVisualizzazioneSalvata();
+
+    aggiornaContatoriRichieste();
+
+    visualizza();
+
+}
+
+
+/* ============================================================
+   PIN OPERATORI (ACCESSO PERSONALE AI PROPRI TURNI)
+   ============================================================ */
+
+function getOperatoriPin() {
+
+    try {
+
+        const dati =
+            JSON.parse(
+                localStorage.getItem(
+                    CHIAVE_OPERATORI
+                ) || "[]"
+            );
+
+        if (Array.isArray(dati)) {
+
+            return dati;
+
+        }
+
+    }
+    catch(e) {}
+
+    return [];
+
+}
+
+
+function salvaOperatoriPin(lista) {
+
+    try {
+
+        localStorage.setItem(
+            CHIAVE_OPERATORI,
+            JSON.stringify(lista)
+        );
+
+    }
+    catch(e) {
+
+        alert(
+            "Impossibile salvare l'elenco PIN."
+        );
+
+    }
+
+}
+
+
+function apriGestionePin() {
+
+    if (!amministratore) {
+        return;
+    }
+
+    apriModal(
+        "👥 GESTISCI PIN OPERATORI",
+        `
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Nome e cognome operatore</label>
+
+                <input
+                    id="nuovoNomeOperatorePin"
+                    type="text"
+                    placeholder="Es. Mario Rossi">
+
+            </div>
+
+            <div class="form-group">
+                <label>PIN (4 cifre)</label>
+
+                <input
+                    id="nuovoPinOperatore"
+                    type="text"
+                    maxlength="6"
+                    placeholder="Es. 1234">
+
+            </div>
+
+        </div>
+
+        <div class="modal-buttons">
+
+            <button
+                class="btn-salva"
+                onclick="aggiungiOperatorePin()">
+                ➕ AGGIUNGI / AGGIORNA
+            </button>
+
+        </div>
+
+        <div
+            id="elencoOperatoriPin"
+            style="margin-top:16px;">
+        </div>
+
+        `
+    );
+
+    renderElencoOperatoriPin();
+
+}
+
+
+function renderElencoOperatoriPin() {
+
+    const contenitore =
+        document.getElementById(
+            "elencoOperatoriPin"
+        );
+
+    if (!contenitore) {
+        return;
+    }
+
+    const lista =
+        getOperatoriPin();
+
+    const archivioPdf =
+        getPdfOperatori();
+
+    if (lista.length === 0) {
+
+        contenitore.innerHTML =
+            "<p style='color:#64748b;'>Nessun operatore con PIN configurato.</p>";
+
+        return;
+
+    }
+
+    contenitore.innerHTML =
+        lista.map(function(op, indice) {
+
+            const inputId =
+                "pdfInput_" + indice;
+
+            const pdfEsistente =
+                archivioPdf[
+                    normalizza(op.nome)
+                ];
+
+            const rigaPdf =
+                pdfEsistente
+                    ? (
+                        "<p style='margin:6px 0; color:#166534;'>📎 PDF caricato: " +
+                        escapeHtml(pdfEsistente.nomeFile) +
+                        " (" + escapeHtml(pdfEsistente.caricatoIl) + ") " +
+                        "<button class='btn-elimina' style='padding:3px 7px; font-size:11px;' " +
+                        "onclick=\"eliminaPdfOperatore('" +
+                        escapeHtml(op.nome).replace(/'/g,"\\'") +
+                        "')\">🗑</button></p>"
+                    )
+                    : (
+                        "<p style='margin:6px 0; color:#9a3412;'>Nessun PDF caricato.</p>"
+                    );
+
+            return (
+
+                "<div class='richiesta-card'>" +
+                "<strong>" + escapeHtml(op.nome) + "</strong>" +
+                " — PIN: " + escapeHtml(op.pin) +
+                " <button class='btn-elimina' style='padding:4px 8px; font-size:12px;' " +
+                "onclick=\"eliminaOperatorePin('" + escapeHtml(op.nome).replace(/'/g,"\\'") + "')\">" +
+                "🗑 RIMUOVI OPERATORE</button>" +
+                rigaPdf +
+                "<div style='display:flex; gap:6px; flex-wrap:wrap; align-items:center;'>" +
+                "<input type='file' accept='.pdf' id='" + inputId + "'>" +
+                "<button class='btn-salva' style='padding:6px 10px; font-size:12px;' " +
+                "onclick=\"caricaPdfPerOperatore('" +
+                escapeHtml(op.nome).replace(/'/g,"\\'") +
+                "','" + inputId + "')\">📎 CARICA PDF TURNI</button>" +
+                "</div>" +
+                "</div>"
+
+            );
+
+        }).join("");
+
+}
+
+
+function aggiungiOperatorePin() {
+
+    const nome =
+        testo(
+            document.getElementById(
+                "nuovoNomeOperatorePin"
+            ).value
+        );
+
+    const pin =
+        testo(
+            document.getElementById(
+                "nuovoPinOperatore"
+            ).value
+        );
+
+    if (!nome || !pin) {
+
+        alert(
+            "Inserisci nome e PIN."
+        );
+
+        return;
+
+    }
+
+    const lista =
+        getOperatoriPin().filter(
+            function(op) {
+
+                return normalizza(op.nome) !==
+                    normalizza(nome);
+
+            }
+        );
+
+    lista.push({
+        nome: nome,
+        pin: pin
+    });
+
+    salvaOperatoriPin(lista);
+
+    document.getElementById(
+        "nuovoNomeOperatorePin"
+    ).value = "";
+
+    document.getElementById(
+        "nuovoPinOperatore"
+    ).value = "";
+
+    renderElencoOperatoriPin();
+
+}
+
+
+function eliminaOperatorePin(nome) {
+
+    if (!confirm(
+        "Rimuovere il PIN di " + nome + "?"
+    )) {
+        return;
+    }
+
+    const lista =
+        getOperatoriPin().filter(
+            function(op) {
+
+                return normalizza(op.nome) !==
+                    normalizza(nome);
+
+            }
+        );
+
+    salvaOperatoriPin(lista);
+
+    renderElencoOperatoriPin();
+
+}
+
+
+/* ============================================================
+   LOGIN OPERATORE CON PIN (VISTA PERSONALE + PDF PERSONALE)
+   ============================================================ */
+
+function apriLoginPin() {
+
+    const lista =
+        getOperatoriPin();
+
+    if (lista.length === 0) {
+
+        alert(
+            "Nessun PIN configurato.\n\n" +
+            "Chiedi all'amministratore di assegnarti un PIN " +
+            "da GESTISCI PIN OPERATORI."
+        );
+
+        return;
+
+    }
+
+    const opzioni =
+        lista.map(function(op) {
+
+            return (
+
+                "<option value=\"" +
+                escapeHtml(op.nome) +
+                "\">" +
+                escapeHtml(op.nome) +
+                "</option>"
+
+            );
+
+        }).join("");
+
+    apriModal(
+        "🔑 ACCEDI CON IL TUO PIN",
+        `
+
+        <div class="form-grid">
+
+            <div class="form-group full">
+                <label>Il tuo nome</label>
+
+                <select id="loginPinNome">
+                    ${opzioni}
+                </select>
+
+            </div>
+
+            <div class="form-group full">
+                <label>PIN</label>
+
+                <input
+                    id="loginPinValore"
+                    type="password"
+                    inputmode="numeric"
+                    placeholder="Inserisci il tuo PIN">
+
+            </div>
+
+        </div>
+
+        <div class="modal-buttons">
+
+            <button
+                class="btn-chiudi"
+                onclick="chiudiModal()">
+                ANNULLA
+            </button>
+
+            <button
+                class="btn-salva"
+                onclick="tentaLoginPin()">
+                ENTRA
+            </button>
+
+        </div>
+
+        `
+    );
+
+}
+
+
+function tentaLoginPin() {
+
+    const nomeSelezionato =
+        document.getElementById(
+            "loginPinNome"
+        ).value;
+
+    const pinInserito =
+        testo(
+            document.getElementById(
+                "loginPinValore"
+            ).value
+        );
+
+    const lista =
+        getOperatoriPin();
+
+    const trovato =
+        lista.find(function(op) {
+
+            return normalizza(op.nome) ===
+                normalizza(nomeSelezionato);
+
+        });
+
+    if (
+        !trovato ||
+        trovato.pin !== pinInserito
+    ) {
+
+        alert(
+            "PIN NON VALIDO."
+        );
+
+        return;
+
+    }
+
+    chiudiModal();
+
+    entraComeOperatorePersonale(
+        trovato.nome
+    );
+
+}
+
+
+function entraComeOperatorePersonale(nome) {
+
+    operatoreCorrente = nome;
+
+    modalitaPersonale = true;
+
+    const badge =
+        document.getElementById(
+            "badgeOperatore"
+        );
+
+    badge.textContent =
+        "👤 SEI ENTRATO COME: " +
+        nome.toUpperCase() +
+        " — vedi solo i tuoi turni";
+
+    badge.style.display =
+        "block";
+
+    avviaSessioneOperatore();
+
+    setTimeout(
+        function() {
+
+            const rigaBtn =
+                document.getElementById(
+                    "rigaRichiesteOperatore"
+                );
+
+            if (
+                rigaBtn &&
+                !document.getElementById(
+                    "btnMioPdf"
+                )
+            ) {
+
+                const bottonePdf =
+                    document.createElement(
+                        "button"
+                    );
+
+                bottonePdf.id =
+                    "btnMioPdf";
+
+                bottonePdf.className =
+                    "btn-stampa";
+
+                bottonePdf.style.background =
+                    "#0891b2";
+
+                bottonePdf.textContent =
+                    "📎 IL MIO PDF TURNI (CARICATO DALL'ADMIN)";
+
+                bottonePdf.addEventListener(
+                    "click",
+                    apriPdfOperatoreCorrente
+                );
+
+                rigaBtn.appendChild(
+                    bottonePdf
+                );
+
+            }
+
+        },
+        0
+    );
+
+}
+
+
+/* ============================================================
+   PDF PERSONALE CARICATO DALL'ADMIN PER OGNI OPERATORE
+   ============================================================ */
+
+function getPdfOperatoriLocali() {
+
+    try {
+
+        const dati =
+            JSON.parse(
+                localStorage.getItem(
+                    CHIAVE_PDF_OPERATORI
+                ) || "{}"
+            );
+
+        if (
+            dati &&
+            typeof dati === "object"
+        ) {
+
+            return dati;
+
+        }
+
+    }
+    catch(e) {}
+
+    return {};
+
+}
+
+
+function salvaPdfOperatori(dati) {
+
+    try {
+
+        localStorage.setItem(
+            CHIAVE_PDF_OPERATORI,
+            JSON.stringify(dati)
+        );
+
+        return true;
+
+    }
+    catch(e) {
+
+        alert(
+            "IMPOSSIBILE SALVARE IL PDF.\n\n" +
+            "Il file è probabilmente troppo grande " +
+            "per essere conservato nel browser.\n" +
+            "Prova con un PDF più leggero (es. sotto 1-2 MB)."
+        );
+
+        return false;
+
+    }
+
+}
+
+
+function caricaPdfPerOperatore(
+    nomeOperatore,
+    inputId
+) {
+
+    const input =
+        document.getElementById(
+            inputId
+        );
+
+    if (
+        !input ||
+        !input.files ||
+        !input.files[0]
+    ) {
+
+        alert(
+            "Seleziona prima un file PDF."
+        );
+
+        return;
+
+    }
+
+    const file =
+        input.files[0];
+
+    if (
+        !/\.pdf$/i.test(
+            file.name
+        )
+    ) {
+
+        alert(
+            "Il file deve essere un PDF."
+        );
+
+        return;
+
+    }
+
+    const lettore =
+        new FileReader();
+
+    lettore.onload =
+        function() {
+
+            const archivio =
+                getPdfOperatori();
+
+            archivio[
+                normalizza(nomeOperatore)
+            ] = {
+
+                nome:
+                    nomeOperatore,
+
+                nomeFile:
+                    file.name,
+
+                dataUrl:
+                    lettore.result,
+
+                caricatoIl:
+                    new Date()
+                        .toLocaleString("it-IT")
+
+            };
+
+            const salvato =
+                salvaPdfOperatori(
+                    archivio
+                );
+
+            if (salvato) {
+
+                alert(
+                    "PDF caricato per " +
+                    nomeOperatore + "."
+                );
+
+                renderElencoOperatoriPin();
+
+            }
+
+        };
+
+    lettore.onerror =
+        function() {
+
+            alert(
+                "Errore durante la lettura del PDF."
+            );
+
+        };
+
+    lettore.readAsDataURL(
+        file
+    );
+
+}
+
+
+function eliminaPdfOperatore(nomeOperatore) {
+
+    if (!confirm(
+        "Rimuovere il PDF caricato per " +
+        nomeOperatore + "?"
+    )) {
+        return;
+    }
+
+    const archivio =
+        getPdfOperatori();
+
+    delete archivio[normalizza(nomeOperatore)];
+    delete pdfDaFile[normalizza(nomeOperatore)];
+
+    salvaPdfOperatori(
+        archivio
+    );
+
+    renderElencoOperatoriPin();
+
+}
+
+
+function apriPdfOperatoreCorrente() {
+
+    if (!operatoreCorrente) {
+        return;
+    }
+
+    const archivio =
+        getPdfOperatori();
+
+    const voce =
+        archivio[
+            normalizza(operatoreCorrente)
+        ];
+
+    if (!voce) {
+        apriPdfDaCartella(operatoreCorrente);
+        return;
+    }
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+    link.href =
+        voce.dataUrl;
+
+    link.download =
+        voce.nomeFile ||
+        (operatoreCorrente + ".pdf");
+
+    link.target =
+        "_blank";
+
+    document.body.appendChild(
+        link
+    );
+
+    link.click();
+
+    document.body.removeChild(
+        link
+    );
+
+}
+
+
+/* ============================================================
+   PASSWORD AMMINISTRATORE PERSONALIZZABILE
+   ============================================================ */
+
+function getPasswordCorrente() {
+
+    try {
+
+        const salvata =
+            localStorage.getItem(
+                CHIAVE_PASSWORD
+            );
+
+
+        if (
+            salvata &&
+            salvata.length > 0
+        ) {
+
+            return salvata;
+
+        }
+
+    }
+    catch(e) {}
+
+
+    return PASSWORD_AMMINISTRATORE;
+
+}
+
+
+function apriCambiaPassword() {
+
+    if (!amministratore) {
+        return;
+    }
+
+
+    apriModal(
+        "🔑 CAMBIA PASSWORD",
+        `
+
+        <div class="form-grid">
+
+            <div class="form-group full">
+                <label>Nuova password</label>
+
+                <input
+                    id="nuovaPassword1"
+                    type="text"
+                    placeholder="Nuova password">
+
+            </div>
+
+            <div class="form-group full">
+                <label>Conferma nuova password</label>
+
+                <input
+                    id="nuovaPassword2"
+                    type="text"
+                    placeholder="Ripeti nuova password">
+
+            </div>
+
+        </div>
+
+        <div class="modal-buttons">
+
+            <button
+                class="btn-chiudi"
+                onclick="chiudiModal()">
+                ANNULLA
+            </button>
+
+            <button
+                class="btn-salva"
+                onclick="salvaNuovaPassword()">
+                SALVA PASSWORD
+            </button>
+
+        </div>
+
+        `
+    );
+
+}
+
+
+function salvaNuovaPassword() {
+
+    const p1 =
+        testo(
+            document.getElementById(
+                "nuovaPassword1"
+            ).value
+        );
+
+
+    const p2 =
+        testo(
+            document.getElementById(
+                "nuovaPassword2"
+            ).value
+        );
+
+
+    if (
+        !p1 ||
+        p1.length < 4
+    ) {
+
+        alert(
+            "La password deve avere almeno 4 caratteri."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        p1 !== p2
+    ) {
+
+        alert(
+            "Le due password non coincidono."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        localStorage.setItem(
+            CHIAVE_PASSWORD,
+            p1
+        );
+
+
+        chiudiModal();
+
+
+        alert(
+            "PASSWORD AGGIORNATA CORRETTAMENTE."
+        );
+
+    }
+    catch(e) {
+
+        alert(
+            "Impossibile salvare la nuova password."
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   SALVA / CARICA DATI TURNI IN LOCALE
+   (permette all'operatore di vedere i turni
+   senza dover caricare l'Excel)
+   ============================================================ */
+
+function salvaDatiLocali() {
+
+    try {
+
+        localStorage.setItem(
+            CHIAVE_DATI,
+            JSON.stringify({
+
+                turni:
+                    turni,
+
+                chiusure:
+                    chiusure,
+
+                assenze:
+                    assenze,
+
+                nomeFileOriginale:
+                    nomeFileOriginale
+
+            })
+        );
+
+    }
+    catch(e) {
+
+        console.warn(
+            "Impossibile salvare i dati in locale.",
+            e
+        );
+
+    }
+
+}
+
+
+function caricaDatiLocali() {
+
+    if (fileCaricato) {
+
+        /*
+           Se in questa sessione è già stato
+           caricato un Excel, non sovrascrivere.
+        */
+
+        return;
+
+    }
+
+
+    try {
+
+        const dati =
+            JSON.parse(
+                localStorage.getItem(
+                    CHIAVE_DATI
+                ) || "null"
+            );
+
+
+        if (!dati) {
+            return;
+        }
+
+
+        turni =
+            dati.turni || {};
+
+        chiusure =
+            dati.chiusure || {};
+
+        assenze =
+            dati.assenze || {};
+
+        nomeFileOriginale =
+            dati.nomeFileOriginale || "";
+
+
+        fileCaricato = true;
+
+
+        document
+            .getElementById(
+                "stato"
+            )
+            .textContent =
+                "Turni caricati (ultimo aggiornamento salvato).";
+
+    }
+    catch(e) {
+
+        console.warn(
+            "Impossibile leggere i dati locali.",
+            e
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   LEGGI DATA
+   ============================================================ */
+
+function dataDaSeriale(v) {
+
+    if (!isFinite(v) || v < 30000 || v > 80000) {
+        return null;
+    }
+
+    const d = new Date(Math.round((v - 25569) * 86400 * 1000));
+
+    return formatData(
+        new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+    );
+
+}
+
+
+function leggiData(valore) {
+
+    if (typeof valore === "number") {
+        return dataDaSeriale(valore);
+    }
+
+
+    if (
+        valore instanceof Date &&
+        !isNaN(valore)
+    ) {
+
+        return formatData(
+            valore
+        );
+
+    }
+
+
+    let s =
+        testo(valore);
+
+
+    if (!s) {
+        return null;
+    }
+
+
+    if (/^\d{5}(\.\d+)?$/.test(s)) {
+        return dataDaSeriale(parseFloat(s));
+    }
+
+    s =
+        s.replace(
+            /\./g,
+            "/"
+        )
+        .trim();
+
+
+    const match =
+        s.match(
+            /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})/
+        );
+
+
+    if (!match) {
+        return null;
+    }
+
+
+    let giorno =
+        parseInt(
+            match[1],
+            10
+        );
+
+
+    let mese =
+        parseInt(
+            match[2],
+            10
+        );
+
+
+    let anno =
+        parseInt(
+            match[3],
+            10
+        );
+
+
+    if (
+        anno < 100
+    ) {
+
+        anno += 2000;
+
+    }
+
+
+    const d =
+        new Date(
+            anno,
+            mese - 1,
+            giorno
+        );
+
+
+    if (
+        isNaN(d.getTime())
+    ) {
+
+        return null;
+
+    }
+
+
+    if (
+        d.getDate() !== giorno ||
+        d.getMonth() !== mese - 1 ||
+        d.getFullYear() !== anno
+    ) {
+
+        return null;
+
+    }
+
+
+    return formatData(d);
+
+}
+
+
+/* ============================================================
+   FORMATTA DATA
+   ============================================================ */
+
+function formatData(data) {
+
+    const gg =
+        String(
+            data.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const mm =
+        String(
+            data.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const aa =
+        data.getFullYear();
+
+
+    return (
+        aa +
+        "-" +
+        mm +
+        "-" +
+        gg
+    );
+
+}
+
+
+/* ============================================================
+   LEGGI ORA
+   ============================================================ */
+
+function leggiOra(valore) {
+
+    if (
+        valore === null ||
+        valore === undefined ||
+        valore === ""
+    ) {
+
+        return null;
+
+    }
+
+
+    if (
+        typeof valore === "number" &&
+        isFinite(valore)
+    ) {
+
+        if (valore < 0 || valore >= 1) {
+            return null;
+        }
+
+
+        let minuti =
+            Math.round(
+                valore * 24 * 60
+            );
+
+
+        minuti =
+            minuti %
+            (24 * 60);
+
+
+        if (
+            minuti < 0
+        ) {
+
+            minuti +=
+                24 * 60;
+
+        }
+
+
+        const hh =
+            Math.floor(
+                minuti / 60
+            );
+
+
+        const mm =
+            minuti % 60;
+
+
+        return (
+            String(hh).padStart(2,"0") +
+            ":" +
+            String(mm).padStart(2,"0")
+        );
+
+    }
+
+
+    let s =
+        testo(valore)
+            .trim();
+
+
+    if (!s) {
+        return null;
+    }
+
+
+    const match =
+        s.match(
+            /^(\d{1,2})[:.](\d{2})(?::(\d{2}))?$/
+        );
+
+
+    if (!match) {
+        return null;
+    }
+
+
+    const hh =
+        parseInt(
+            match[1],
+            10
+        );
+
+
+    const mm =
+        parseInt(
+            match[2],
+            10
+        );
+
+
+    if (
+        hh > 23 ||
+        mm > 59
+    ) {
+
+        return null;
+
+    }
+
+
+    return (
+        String(hh).padStart(2,"0") +
+        ":" +
+        String(mm).padStart(2,"0")
+    );
+
+}
+
+
+/* ============================================================
+   CALCOLA ORE
+   ============================================================ */
+
+function calcolaOre(
+    entrata,
+    uscita
+) {
+
+    if (
+        !entrata ||
+        !uscita
+    ) {
+
+        return "";
+
+    }
+
+
+    const p1 =
+        entrata.split(":");
+
+
+    const p2 =
+        uscita.split(":");
+
+
+    let m1 =
+        parseInt(p1[0],10) * 60 +
+        parseInt(p1[1],10);
+
+
+    let m2 =
+        parseInt(p2[0],10) * 60 +
+        parseInt(p2[1],10);
+
+
+    if (
+        m2 < m1
+    ) {
+
+        m2 +=
+            24 * 60;
+
+    }
+
+
+    const differenza =
+        m2 - m1;
+
+
+    const hh =
+        Math.floor(
+            differenza / 60
+        );
+
+
+    const mm =
+        differenza % 60;
+
+
+    return (
+        String(hh).padStart(2,"0") +
+        ":" +
+        String(mm).padStart(2,"0")
+    );
+
+}
+
+
+/* ============================================================
+   TESTO
+   ============================================================ */
+
+function testo(valore) {
+
+    if (
+        valore === null ||
+        valore === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(valore)
+        .replace(
+            /\u00A0/g,
+            " "
+        )
+        .replace(
+            /\s+/g,
+            " "
+        )
+        .trim();
+
+}
+
+
+/* ============================================================
+   NORMALIZZA
+   ============================================================ */
+
+function normalizza(valore) {
+
+    return testo(valore)
+        .normalize("NFD")
+        .replace(
+            /[\u0300-\u036f]/g,
+            ""
+        )
+        .toUpperCase()
+        .trim();
+
+}
+
+
+/* ============================================================
+   AGGIUNGI GIORNI
+   ============================================================ */
+
+function aggiungiGiorni(
+    data,
+    giorni
+) {
+
+    const d =
+        new Date(
+            data.getTime()
+        );
+
+
+    d.setDate(
+        d.getDate() + giorni
+    );
+
+
+    return d;
+
+}
+
+
+/* ============================================================
+   NOME GIORNO
+   ============================================================ */
+
+function nomeGiorno(
+    data
+) {
+
+    const giorni = [
+
+        "DOMENICA",
+        "LUNEDI",
+        "MARTEDI",
+        "MERCOLEDI",
+        "GIOVEDI",
+        "VENERDI",
+        "SABATO"
+
+    ];
+
+
+    return giorni[
+        data.getDay()
+    ];
+
+}
+
+
+/* ============================================================
+   DATA VISUALIZZAZIONE
+   ============================================================ */
+
+function dataVisualizzazione(
+    data
+) {
+
+    return (
+        String(
+            data.getDate()
+        ).padStart(2,"0")
+        +
+        "/"
+        +
+        String(
+            data.getMonth() + 1
+        ).padStart(2,"0")
+        +
+        "/"
+        +
+        data.getFullYear()
+    );
+
+}
+
+
+/* ============================================================
+   VISUALIZZA
+   ============================================================ */
+
+function creaBottoniPostazioni() {
+
+    const riga = document.getElementById("rigaPostazioni");
+    if (!riga) { return; }
+
+    riga.innerHTML = "";
+
+    const voci = [{ id: "tutte", nome: "🏢 TUTTE" }].concat(
+        postazioni.map(function(p) {
+            return {
+                id: p.id,
+                nome: p.nome.replace("Poste Napoli ", "").toUpperCase()
+            };
+        })
+    );
+
+    voci.forEach(function(v) {
+        const b = document.createElement("button");
+        b.className = "btn-postazione";
+        b.dataset.postazione = v.id;
+        b.textContent = v.nome;
+        b.addEventListener("click", function() {
+            filtroPostazione = v.id;
+            visualizza();
+        });
+        riga.appendChild(b);
+    });
+
+}
+
+function aggiornaBottoniPostazioni() {
+
+    document.querySelectorAll(".btn-postazione").forEach(function(b) {
+        b.classList.toggle(
+            "attivo",
+            b.dataset.postazione === filtroPostazione
+        );
+    });
+
+}
+
+
+function nomeFiltroOperatore() {
+
+    if (modalitaPersonale && operatoreCorrente) {
+        return operatoreCorrente;
+    }
+
+    if (filtroOperatore && filtroOperatore !== "tutti") {
+        return filtroOperatore;
+    }
+
+    return null;
+
+}
+
+function aggiornaSelectOperatori() {
+
+    const riga = document.getElementById("rigaOperatoreFiltro");
+    const sel = document.getElementById("selOperatoreFiltro");
+    if (!riga || !sel) { return; }
+
+    const soloAdmin = amministratore;
+    riga.style.display = soloAdmin ? "flex" : "none";
+    if (!soloAdmin && !modalitaPersonale) { filtroOperatore = "tutti"; }
+    const rigaPost = document.getElementById("rigaPostazioni");
+    if (rigaPost) { rigaPost.style.display = modalitaPersonale ? "none" : "flex"; }
+    if (modalitaPersonale) { filtroPostazione = "tutte"; }
+
+    const nomi = {};
+
+    for (const data in turni) {
+        for (const pid in turni[data]) {
+            turni[data][pid].forEach(function(t) {
+                if (t.nome) { nomi[normalizza(t.nome)] = t.nome; }
+            });
+        }
+    }
+
+    const lista = Object.keys(nomi).sort().map(function(k) { return nomi[k]; });
+
+    sel.innerHTML =
+        '<option value="tutti">👥 TUTTI GLI OPERATORI</option>' +
+        lista.map(function(n) {
+            return '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>';
+        }).join("");
+
+    sel.value =
+        (filtroOperatore === "tutti" || lista.indexOf(filtroOperatore) !== -1)
+            ? filtroOperatore
+            : "tutti";
+
+    if (sel.value !== filtroOperatore) { filtroOperatore = "tutti"; }
+
+}
+
+function visualizzaMese() {
+
+    const contenitore = document.getElementById("risultati");
+    contenitore.innerHTML = "";
+
+    const mesi = [
+        "GENNAIO","FEBBRAIO","MARZO","APRILE","MAGGIO","GIUGNO",
+        "LUGLIO","AGOSTO","SETTEMBRE","OTTOBRE","NOVEMBRE","DICEMBRE"
+    ];
+
+    const oggi = new Date();
+    oggi.setHours(0, 0, 0, 0);
+
+    const primo = new Date(oggi.getFullYear(), oggi.getMonth() + offsetMese, 1);
+    const giorniMese = new Date(primo.getFullYear(), primo.getMonth() + 1, 0).getDate();
+
+    const intestazione = document.createElement("div");
+    intestazione.className = "giorno-titolo";
+    intestazione.style.borderRadius = "14px";
+    intestazione.style.marginBottom = "14px";
+    intestazione.textContent =
+        "📅 " + mesi[primo.getMonth()] + " " + primo.getFullYear() +
+        (nomeFiltroOperatore() ? " — " + nomeFiltroOperatore().toUpperCase() : "") +
+        (filtroPostazione !== "tutte"
+            ? " — " + postazionePerId(filtroPostazione).nome.replace("Poste Napoli ", "").toUpperCase()
+            : "");
+    contenitore.appendChild(intestazione);
+
+    for (let g = 1; g <= giorniMese; g++) {
+        creaGiorno(
+            contenitore,
+            new Date(primo.getFullYear(), primo.getMonth(), g)
+        );
+    }
+
+}
+
+
+function visualizza() {
+
+    aggiornaBottoniPostazioni();
+
+    aggiornaSelectOperatori();
+
+    salvaVisualizzazione();
+
+
+    if (!fileCaricato) {
+
+        document
+            .getElementById(
+                "risultati"
+            )
+            .innerHTML =
+                "<div class='nessun-turno'>" +
+                "Carica prima il file Excel." +
+                "</div>";
+
+        return;
+
+    }
+
+
+    if (modalita === "mese") {
+
+        visualizzaMese();
+
+    }
+    else if (modalita === "giorno") {
+
+        visualizzaGiorno();
+
+    }
+    else {
+
+        visualizzaSettimana();
+
+    }
+
+}
+
+
+/* ============================================================
+   VISUALIZZA SETTIMANA
+   ============================================================ */
+
+function visualizzaSettimana() {
+
+    const contenitore =
+        document.getElementById(
+            "risultati"
+        );
+
+
+    contenitore.innerHTML = "";
+
+
+    const oggi =
+        new Date();
+
+
+    oggi.setHours(
+        0,0,0,0
+    );
+
+
+    const giornoSettimana =
+        oggi.getDay();
+
+
+    const differenzaLunedi =
+        giornoSettimana === 0
+            ? -6
+            : 1 - giornoSettimana;
+
+
+    const lunedi =
+        aggiungiGiorni(
+            oggi,
+            differenzaLunedi +
+            offsetSettimana * 7
+        );
+
+
+    for (
+        let i = 0;
+        i < 7;
+        i++
+    ) {
+
+        const data =
+            aggiungiGiorni(
+                lunedi,
+                i
+            );
+
+
+        creaGiorno(
+            contenitore,
+            data
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   VISUALIZZA GIORNO
+   ============================================================ */
+
+function visualizzaGiorno() {
+
+    const contenitore =
+        document.getElementById(
+            "risultati"
+        );
+
+
+    contenitore.innerHTML = "";
+
+
+    const oggi =
+        new Date();
+
+
+    oggi.setHours(
+        0,0,0,0
+    );
+
+
+    const data =
+        aggiungiGiorni(
+            oggi,
+            offsetGiorno
+        );
+
+
+    creaGiorno(
+        contenitore,
+        data
+    );
+
+}
+
+
+/* ============================================================
+   TROVA TURNO
+   ============================================================ */
+
+function trovaTurno(
+    data,
+    postazioneId,
+    turnoId
+) {
+
+    if (
+        !turni[data] ||
+        !turni[data][postazioneId]
+    ) {
+
+        return null;
+
+    }
+
+
+    return turni[data][postazioneId]
+        .find(
+            function(t) {
+
+                return t.id === turnoId;
+
+            }
+        ) || null;
+
+}
+
+
+/* ============================================================
+   TROVA TURNO PER ID
+   ============================================================ */
+
+function trovaTurnoPerId(
+    turnoId
+) {
+
+    for (
+        const data in turni
+    ) {
+
+        for (
+            const postazioneId in turni[data]
+        ) {
+
+            const lista =
+                turni[data][postazioneId];
+
+
+            const turno =
+                lista.find(
+                    function(t) {
+
+                        return t.id === turnoId;
+
+                    }
+                );
+
+
+            if (turno) {
+
+                return {
+
+                    data:
+                        data,
+
+                    postazioneId:
+                        postazioneId,
+
+                    turno:
+                        turno
+
+                };
+
+            }
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+/* ============================================================
+   CREA GIORNO
+   ============================================================ */
+
+function creaGiorno(
+    contenitore,
+    data
+) {
+
+    const chiave =
+        formatData(data);
+
+
+    const giorno =
+        document.createElement(
+            "div"
+        );
+
+
+    giorno.className =
+        "giorno";
+
+
+    const titolo =
+        document.createElement(
+            "div"
+        );
+
+
+    titolo.className =
+        "giorno-titolo";
+
+
+    titolo.textContent =
+        nomeGiorno(data) +
+        " " +
+        dataVisualizzazione(data);
+
+
+    giorno.appendChild(
+        titolo
+    );
+
+
+    let qualcosaAggiunto =
+        false;
+
+    for (
+        let i = 0;
+        i < postazioni.length;
+        i++
+    ) {
+
+        if (
+            filtroPostazione !== "tutte" &&
+            postazioni[i].id !== filtroPostazione
+        ) {
+            continue;
+        }
+
+        const aggiunto =
+            creaPostazione(
+                giorno,
+                chiave,
+                postazioni[i]
+            );
+
+        if (aggiunto) {
+
+            qualcosaAggiunto =
+                true;
+
+        }
+
+    }
+
+
+    if (
+        nomeFiltroOperatore() &&
+        !qualcosaAggiunto
+    ) {
+
+        const nessunoPersonale =
+            document.createElement(
+                "div"
+            );
+
+        nessunoPersonale.className =
+            "nessun-turno";
+
+        nessunoPersonale.style.padding =
+            "18px";
+
+        nessunoPersonale.textContent =
+            (modalitaPersonale
+                ? "NESSUN TURNO PER TE IN QUESTO GIORNO"
+                : "NESSUN TURNO PER " + nomeFiltroOperatore().toUpperCase());
+
+        giorno.appendChild(
+            nessunoPersonale
+        );
+
+    }
+
+
+    contenitore.appendChild(
+        giorno
+    );
+
+}
+
+
+/* ============================================================
+   CREA BOX ASSENZE (riutilizzabile anche se il sito è chiuso)
+   ============================================================ */
+
+function creaBoxAssenze(
+    data,
+    postazioneId
+) {
+
+    let listaAssenze =
+        assenze[data] &&
+        assenze[data]
+            [postazioneId]
+            ? assenze[data]
+                [postazioneId]
+            : [];
+    if (modalitaPersonale && operatoreCorrente) {
+        listaAssenze = listaAssenze.filter(function(a) {
+            return normalizza(a.nome) === normalizza(operatoreCorrente);
+        });
+    }
+
+
+    if (
+        listaAssenze.length === 0
+    ) {
+
+        return null;
+
+    }
+
+
+    const boxAssenze =
+        document.createElement(
+            "div"
+        );
+
+
+    boxAssenze.className =
+        "assenze";
+
+
+    const titoloAssenze =
+        document.createElement(
+            "div"
+        );
+
+
+    titoloAssenze.className =
+        "assenze-titolo";
+
+
+    titoloAssenze.textContent =
+        "ASSENTI";
+
+
+    boxAssenze.appendChild(
+        titoloAssenze
+    );
+
+
+    listaAssenze.forEach(
+        function(assente) {
+
+            const riga =
+                document.createElement(
+                    "div"
+                );
+
+
+            riga.className =
+                "assente";
+
+
+            const nome =
+                document.createElement(
+                    "div"
+                );
+
+
+            nome.className =
+                "assente-nome";
+
+
+            nome.textContent =
+                assente.nome;
+
+
+            const tipo =
+                document.createElement(
+                    "div"
+                );
+
+
+            tipo.className =
+                "assente-tipo";
+
+
+            tipo.textContent =
+                assente.tipo;
+
+
+            riga.appendChild(
+                nome
+            );
+
+
+            riga.appendChild(
+                tipo
+            );
+
+
+            boxAssenze.appendChild(
+                riga
+            );
+
+        }
+    );
+
+
+    return boxAssenze;
+
+}
+
+
+/* ============================================================
+   CREA POSTAZIONE
+   ============================================================ */
+
+function creaPostazione(
+    contenitore,
+    data,
+    postazione
+) {
+
+    const box =
+        document.createElement(
+            "div"
+        );
+
+
+    box.className =
+        "postazione";
+
+
+    const titolo =
+        document.createElement(
+            "div"
+        );
+
+
+    titolo.className =
+        "postazione-titolo";
+
+
+    titolo.textContent =
+        postazione.nome;
+
+
+    box.appendChild(
+        titolo
+    );
+
+
+    if (
+        chiusure[data] &&
+        chiusure[data]
+            [postazione.id]
+    ) {
+
+        if (nomeFiltroOperatore()) {
+
+            /*
+               In vista personale non mostriamo
+               le postazioni chiuse: non sono
+               riferibili al singolo operatore.
+            */
+
+            return false;
+
+        }
+
+
+        const chiuso =
+            document.createElement(
+                "div"
+            );
+
+
+        chiuso.className =
+            "chiuso";
+
+
+        chiuso.textContent =
+            "SITO CHIUSO";
+
+
+        box.appendChild(
+            chiuso
+        );
+
+
+        const boxAssenzeChiuso =
+            creaBoxAssenze(
+                data,
+                postazione.id
+            );
+
+
+        if (
+            boxAssenzeChiuso
+        ) {
+
+            box.appendChild(
+                boxAssenzeChiuso
+            );
+
+        }
+
+
+        contenitore.appendChild(
+            box
+        );
+
+
+        return true;
+
+    }
+
+
+    let lista =
+        turni[data] &&
+        turni[data]
+            [postazione.id]
+            ? turni[data]
+                [postazione.id]
+            : [];
+
+
+    if (
+        nomeFiltroOperatore()
+    ) {
+
+        lista =
+            lista.filter(
+                function(t) {
+
+                    return normalizza(t.nome) ===
+                        normalizza(nomeFiltroOperatore());
+
+                }
+            );
+
+
+        if (
+            lista.length === 0
+        ) {
+
+            /*
+               Nessun turno per questo operatore
+               in questa postazione: non mostriamo
+               la card per non fare confusione.
+            */
+
+            return false;
+
+        }
+
+    }
+
+
+    if (
+        lista.length === 0
+    ) {
+
+        const nessuno =
+            document.createElement(
+                "div"
+            );
+
+
+        nessuno.className =
+            "nessun-turno";
+
+
+        nessuno.textContent =
+            "NESSUN TURNO";
+
+
+        box.appendChild(
+            nessuno
+        );
+
+    }
+
+    else {
+
+        lista.forEach(
+            function(turno) {
+
+                const riga =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                riga.className =
+                    "turno";
+
+
+                const nome =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                nome.className =
+                    "turno-nome";
+
+
+                nome.textContent =
+                    turno.nome;
+
+
+                const entrata =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                entrata.className =
+                    "turno-ora";
+
+
+                entrata.textContent =
+                    turno.entrata;
+
+
+                const uscita =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                uscita.className =
+                    "turno-ora";
+
+
+                uscita.textContent =
+                    turno.uscita;
+
+
+                const ore =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                ore.className =
+                    "turno-ore";
+
+
+                ore.textContent =
+                    turno.ore ||
+                    "";
+
+
+                riga.appendChild(
+                    nome
+                );
+
+                riga.appendChild(
+                    entrata
+                );
+
+                riga.appendChild(
+                    uscita
+                );
+
+                riga.appendChild(
+                    ore
+                );
+
+
+                if (amministratore) {
+
+                    const azioni =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    azioni.className =
+                        "turno-azioni";
+
+
+                    const modifica =
+                        document.createElement(
+                            "button"
+                        );
+
+
+                    modifica.className =
+                        "btn-modifica";
+
+
+                    modifica.textContent =
+                        "✏️";
+
+
+                    modifica.title =
+                        "Modifica turno";
+
+
+                    modifica.onclick =
+                        function() {
+
+                            apriModificaTurno(
+                                data,
+                                postazione.id,
+                                turno.id
+                            );
+
+                        };
+
+
+                    const elimina =
+                        document.createElement(
+                            "button"
+                        );
+
+
+                    elimina.className =
+                        "btn-elimina";
+
+
+                    elimina.textContent =
+                        "🗑";
+
+
+                    elimina.title =
+                        "Elimina turno";
+
+
+                    elimina.onclick =
+                        function() {
+
+                            eliminaTurno(
+                                data,
+                                postazione.id,
+                                turno.id
+                            );
+
+                        };
+
+
+                    azioni.appendChild(
+                        modifica
+                    );
+
+
+                    azioni.appendChild(
+                        elimina
+                    );
+
+
+                    riga.appendChild(
+                        azioni
+                    );
+
+                }
+
+
+                box.appendChild(
+                    riga
+                );
+
+            }
+        );
+
+    }
+
+
+    const boxAssenze =
+        creaBoxAssenze(
+            data,
+            postazione.id
+        );
+
+
+    if (
+        boxAssenze
+    ) {
+
+        box.appendChild(
+            boxAssenze
+        );
+
+    }
+
+
+    /* --------------------------------------------------------
+       SEGNALA CAMBI TURNO APPROVATI
+       -------------------------------------------------------- */
+
+    const cambi =
+        richieste.filter(
+            function(r) {
+
+                const corrisponde =
+                    r.tipo === "CAMBIO TURNO" &&
+                    r.stato === "APPROVATA" &&
+                    r.data === data;
+
+                if (
+                    !corrisponde ||
+                    !modalitaPersonale ||
+                    !operatoreCorrente
+                ) {
+
+                    return corrisponde;
+
+                }
+
+                return (
+                    normalizza(r.operatore) ===
+                        normalizza(operatoreCorrente) ||
+                    normalizza(r.destinatario) ===
+                        normalizza(operatoreCorrente)
+                );
+
+            }
+        );
+
+
+    cambi.forEach(
+        function(cambio) {
+
+            const segnale =
+                document.createElement(
+                    "div"
+                );
+
+
+            segnale.className =
+                "cambio-segnale";
+
+
+            segnale.textContent =
+                "🔔 CAMBIO TURNO: " +
+                cambio.operatore +
+                (
+                    cambio.destinatario
+                        ? " ↔ " +
+                          cambio.destinatario
+                        : ""
+                );
+
+
+            box.appendChild(
+                segnale
+            );
+
+        }
+    );
+
+
+    contenitore.appendChild(
+        box
+    );
+
+
+    return true;
+
+}
+
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+
+function apriModal(
+    titolo,
+    contenuto
+) {
+
+    document.getElementById(
+        "modalTitolo"
+    ).textContent =
+        titolo;
+
+
+    document.getElementById(
+        "modalContenuto"
+    ).innerHTML =
+        contenuto;
+
+
+    document.getElementById(
+        "modal"
+    ).style.display =
+        "flex";
+
+}
+
+
+function chiudiModal() {
+
+    document.getElementById(
+        "modal"
+    ).style.display =
+        "none";
+
+}
+
+
+/* ============================================================
+   ADMIN
+   ============================================================ */
+
+document
+    .getElementById(
+        "btnRuoloOperatore"
+    )
+    .addEventListener(
+        "click",
+        entraComeOperatore
+    );
+
+
+document
+    .getElementById(
+        "btnRuoloAdmin"
+    )
+    .addEventListener(
+        "click",
+        entraComeAmministratore
+    );
+
+
+document
+    .getElementById(
+        "btnLoginPin"
+    )
+    .addEventListener(
+        "click",
+        apriLoginPin
+    );
+
+
+document
+    .getElementById(
+        "btnGestisciPin"
+    )
+    .addEventListener(
+        "click",
+        apriGestionePin
+    );
+
+
+document
+    .getElementById(
+        "btnCambiaRuolo"
+    )
+    .addEventListener(
+        "click",
+        mostraSchermataRuolo
+    );
+
+
+document
+    .getElementById(
+        "btnCambiaPassword"
+    )
+    .addEventListener(
+        "click",
+        apriCambiaPassword
+    );
+
+
+document
+    .getElementById(
+        "btnEsciAdmin"
+    )
+    .addEventListener(
+        "click",
+        mostraSchermataRuolo
+    );
+
+
+/* ============================================================
+   AGGIUNGI TURNO
+   ============================================================ */
+
+document
+    .getElementById(
+        "btnAggiungi"
+    )
+    .addEventListener(
+        "click",
+        apriNuovoTurno
+    );
+
+
+function apriNuovoTurno() {
+
+    if (!amministratore) {
+        return;
+    }
+
+
+    const oggi =
+        formatData(
+            new Date()
+        );
+
+
+    apriModal(
+        "➕ AGGIUNGI TURNO",
+        `
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Data</label>
+                <input
+                    type="date"
+                    id="nuovoData"
+                    value="${oggi}">
+            </div>
+
+            <div class="form-group">
+                <label>Postazione</label>
+                <select id="nuovoPostazione">
+
+                    ${postazioni.map(
+                        function(p) {
+
+                            return `
+                            <option value="${p.id}">
+                                ${escapeHtml(p.nome)}
+                            </option>
+                            `;
+
+                        }
+                    ).join("")}
+
+                </select>
+            </div>
+
+            <div class="form-group full">
+                <label>Operatore</label>
+                <input
+                    id="nuovoNome"
+                    type="text"
+                    placeholder="Nome e cognome">
+            </div>
+
+            <div class="form-group">
+                <label>Entrata</label>
+                <input
+                    id="nuovoEntrata"
+                    type="time">
+            </div>
+
+            <div class="form-group">
+                <label>Uscita</label>
+                <input
+                    id="nuovoUscita"
+                    type="time">
+            </div>
+
+        </div>
+
+        <div class="modal-buttons">
+
+            <button
+                class="btn-chiudi"
+                onclick="chiudiModal()">
+                ANNULLA
+            </button>
+
+            <button
+                class="btn-salva"
+                onclick="salvaNuovoTurno()">
+                SALVA TURNO
+            </button>
+
+        </div>
+
+        `
+    );
+
+}
+
+
+function salvaNuovoTurno() {
+
+    const data =
+        testo(
+            document.getElementById(
+                "nuovoData"
+            ).value
+        );
+
+
+    const postazioneId =
+        testo(
+            document.getElementById(
+                "nuovoPostazione"
+            ).value
+        );
+
+
+    const nome =
+        testo(
+            document.getElementById(
+                "nuovoNome"
+            ).value
+        );
+
+
+    const entrata =
+        testo(
+            document.getElementById(
+                "nuovoEntrata"
+            ).value
+        );
+
+
+    const uscita =
+        testo(
+            document.getElementById(
+                "nuovoUscita"
+            ).value
+        );
+
+
+    if (
+        !data ||
+        !postazioneId ||
+        !nome ||
+        !entrata ||
+        !uscita
+    ) {
+
+        alert(
+            "Compila tutti i campi."
+        );
+
+        return;
+
+    }
+
+
+    if (!turni[data]) {
+        turni[data] = {};
+    }
+
+
+    if (!turni[data][postazioneId]) {
+        turni[data][postazioneId] = [];
+    }
+
+
+    turni[data][postazioneId]
+        .push({
+
+            id:
+                generaIdTurno(),
+
+            nome:
+                nome,
+
+            entrata:
+                entrata,
+
+            uscita:
+                uscita,
+
+            ore:
+                calcolaOre(
+                    entrata,
+                    uscita
+                )
+
+        });
+
+
+    salvaDatiLocali();
+
+    chiudiModal();
+
+    visualizza();
+
+}
+
+
+/* ============================================================
+   MODIFICA TURNO
+   ============================================================ */
+
+function apriModificaTurno(
+    data,
+    postazioneId,
+    turnoId
+) {
+
+    const risultato =
+        trovaTurno(
+            data,
+            postazioneId,
+            turnoId
+        );
+
+
+    if (!risultato) {
+
+        alert(
+            "Turno non trovato."
+        );
+
+        return;
+
+    }
+
+
+    apriModal(
+        "✏️ MODIFICA TURNO",
+        `
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Data</label>
+                <input
+                    type="date"
+                    id="modData"
+                    value="${data}">
+            </div>
+
+            <div class="form-group">
+                <label>Postazione</label>
+                <select id="modPostazione">
+
+                    ${postazioni.map(
+                        function(p) {
+
+                            return `
+                            <option
+                                value="${p.id}"
+                                ${p.id === postazioneId ? "selected" : ""}>
+                                ${escapeHtml(p.nome)}
+                            </option>
+                            `;
+
+                        }
+                    ).join("")}
+
+                </select>
+            </div>
+
+            <div class="form-group full">
+                <label>Operatore</label>
+                <input
+                    id="modNome"
+                    type="text"
+                    value="${escapeHtml(risultato.nome)}">
+            </div>
+
+            <div class="form-group">
+                <label>Entrata</label>
+                <input
+                    id="modEntrata"
+                    type="time"
+                    value="${escapeHtml(risultato.entrata)}">
+            </div>
+
+            <div class="form-group">
+                <label>Uscita</label>
+                <input
+                    id="modUscita"
+                    type="time"
+                    value="${escapeHtml(risultato.uscita)}">
+            </div>
+
+        </div>
+
+        <div class="modal-buttons">
+
+            <button
+                class="btn-chiudi"
+                onclick="chiudiModal()">
+                ANNULLA
+            </button>
+
+            <button
+                class="btn-salva"
+                onclick="salvaModificaTurno(
+                    '${escapeHtml(data)}',
+                    '${escapeHtml(postazioneId)}',
+                    '${escapeHtml(turnoId)}'
+                )">
+                SALVA MODIFICA
+            </button>
+
+        </div>
+
+        `
+    );
+
+}
+
+
+function salvaModificaTurno(
+    vecchiaData,
+    vecchiaPostazione,
+    turnoId
+) {
+
+    const nuovaData =
+        testo(
+            document.getElementById(
+                "modData"
+            ).value
+        );
+
+
+    const nuovaPostazione =
+        testo(
+            document.getElementById(
+                "modPostazione"
+            ).value
+        );
+
+
+    const nome =
+        testo(
+            document.getElementById(
+                "modNome"
+            ).value
+        );
+
+
+    const entrata =
+        testo(
+            document.getElementById(
+                "modEntrata"
+            ).value
+        );
+
+
+    const uscita =
+        testo(
+            document.getElementById(
+                "modUscita"
+            ).value
+        );
+
+
+    if (
+        !nuovaData ||
+        !nuovaPostazione ||
+        !nome ||
+        !entrata ||
+        !uscita
+    ) {
+
+        alert(
+            "Compila tutti i campi."
+        );
+
+        return;
+
+    }
+
+
+    const turno =
+        trovaTurno(
+            vecchiaData,
+            vecchiaPostazione,
+            turnoId
+        );
+
+
+    if (!turno) {
+
+        alert(
+            "Turno non trovato."
+        );
+
+        return;
+
+    }
+
+
+    turni[vecchiaData]
+        [vecchiaPostazione] =
+        turni[vecchiaData]
+            [vecchiaPostazione]
+            .filter(
+                function(t) {
+                    return t.id !== turnoId;
+                }
+            );
+
+
+    if (
+        turni[vecchiaData]
+            [vecchiaPostazione]
+            .length === 0
+    ) {
+
+        delete turni[vecchiaData]
+            [vecchiaPostazione];
+
+    }
+
+
+    if (
+        !turni[nuovaData]
+    ) {
+
+        turni[nuovaData] = {};
+
+    }
+
+
+    if (
+        !turni[nuovaData]
+            [nuovaPostazione]
+    ) {
+
+        turni[nuovaData]
+            [nuovaPostazione] = [];
+
+    }
+
+
+    turni[nuovaData]
+        [nuovaPostazione]
+        .push({
+
+            id:
+                turnoId,
+
+            nome:
+                nome,
+
+            entrata:
+                entrata,
+
+            uscita:
+                uscita,
+
+            ore:
+                calcolaOre(
+                    entrata,
+                    uscita
+                )
+
+        });
+
+
+    salvaDatiLocali();
+
+    chiudiModal();
+
+    visualizza();
+
+}
+
+
+/* ============================================================
+   ELIMINA TURNO
+   ============================================================ */
+
+function eliminaTurno(
+    data,
+    postazioneId,
+    turnoId
+) {
+
+    const turno =
+        trovaTurno(
+            data,
+            postazioneId,
+            turnoId
+        );
+
+
+    if (!turno) {
+        return;
+    }
+
+
+    const conferma =
+        confirm(
+            "Vuoi eliminare il turno di " +
+            turno.nome +
+            "?"
+        );
+
+
+    if (!conferma) {
+        return;
+    }
+
+
+    turni[data][postazioneId] =
+        turni[data][postazioneId]
+            .filter(
+                function(t) {
+                    return t.id !== turnoId;
+                }
+            );
+
+
+    salvaDatiLocali();
+
+    visualizza();
+
+}
+
+
+/* ============================================================
+   CAMBIO TURNO DIRETTO AMMINISTRATORE
+   ============================================================ */
+
+document
+    .getElementById(
+        "btnCambioAdmin"
+    )
+    .addEventListener(
+        "click",
+        apriCambioAdmin
+    );
+
+
+function apriCambioAdmin() {
+
+    if (!amministratore) {
+        return;
+    }
+
+
+    const oggi =
+        formatData(
+            new Date()
+        );
+
+
+    apriModal(
+        "🔄 CAMBIO TURNO AMMINISTRATORE",
+        `
+
+        <div class="form-grid">
+
+            <div class="form-group full">
+                <label>Data</label>
+
+                <input
+                    type="date"
+                    id="cambioData"
+                    value="${oggi}"
+                    onchange="caricaSelettoriCambio()">
+
+            </div>
+
+            <div class="form-group">
+                <label>Primo turno</label>
+
+                <select
+                    id="cambioTurno1">
+                </select>
+
+            </div>
+
+            <div class="form-group">
+                <label>Secondo turno</label>
+
+                <select
+                    id="cambioTurno2">
+                </select>
+
+            </div>
+
+        </div>
+
+        <div class="modal-buttons">
+
+            <button
+                class="btn-chiudi"
+                onclick="chiudiModal()">
+                ANNULLA
+            </button>
+
+            <button
+                class="btn-cambio"
+                onclick="eseguiCambioAdmin()">
+                🔄 ESEGUI CAMBIO
+            </button>
+
+        </div>
+
+        `
+    );
+
+
+    caricaSelettoriCambio();
+
+}
+
+
+function caricaSelettoriCambio() {
+
+    const data =
+        document.getElementById(
+            "cambioData"
+        ).value;
+
+
+    const select1 =
+        document.getElementById(
+            "cambioTurno1"
+        );
+
+
+    const select2 =
+        document.getElementById(
+            "cambioTurno2"
+        );
+
+
+    if (!select1 || !select2) {
+        return;
+    }
+
+
+    let opzioni = [];
+
+
+    if (turni[data]) {
+
+        for (
+            const postazioneId in
+            turni[data]
+        ) {
+
+            const postazione =
+                postazionePerId(
+                    postazioneId
+                );
+
+
+            turni[data][postazioneId]
+                .forEach(
+                    function(t) {
+
+                        opzioni.push({
+
+                            id:
+                                t.id,
+
+                            testo:
+                                (postazione
+                                    ? postazione.nome
+                                    : postazioneId) +
+                                " - " +
+                                t.nome +
+                                " - " +
+                                t.entrata +
+                                " / " +
+                                t.uscita
+
+                        });
+
+                    }
+                );
+
+        }
+
+    }
+
+
+    const html =
+        opzioni.map(
+            function(o) {
+
+                return `
+                <option value="${escapeHtml(o.id)}">
+                    ${escapeHtml(o.testo)}
+                </option>
+                `;
+
+            }
+        ).join("");
+
+
+    select1.innerHTML =
+        html;
+
+
+    select2.innerHTML =
+        html;
+
+}
+
+
+function eseguiCambioAdmin() {
+
+    const id1 =
+        document.getElementById(
+            "cambioTurno1"
+        ).value;
+
+
+    const id2 =
+        document.getElementById(
+            "cambioTurno2"
+        ).value;
+
+
+    if (
+        !id1 ||
+        !id2
+    ) {
+
+        alert(
+            "Seleziona due turni."
+        );
+
+        return;
+
+    }
+
+
+    if (id1 === id2) {
+
+        alert(
+            "Devi selezionare due turni diversi."
+        );
+
+        return;
+
+    }
+
+
+    const a =
+        trovaTurnoPerId(id1);
+
+
+    const b =
+        trovaTurnoPerId(id2);
+
+
+    if (!a || !b) {
+
+        alert(
+            "Uno dei due turni non è stato trovato."
+        );
+
+        return;
+
+    }
+
+
+    const nomeA =
+        a.turno.nome;
+
+
+    const nomeB =
+        b.turno.nome;
+
+
+    a.turno.nome =
+        nomeB;
+
+
+    b.turno.nome =
+        nomeA;
+
+
+    salvaDatiLocali();
+
+    chiudiModal();
+
+    visualizza();
+
+
+    alert(
+        "CAMBIO TURNO ESEGUITO.\n\n" +
+        nomeA +
+        " ↔ " +
+        nomeB
+    );
+
+}
+
+
+/* ============================================================
+   RICHIESTA GENERICA ASSENZA
+   ============================================================ */
+
+function apriRichiestaAssenza(
+    tipo
+) {
+
+    const oggi =
+        formatData(
+            new Date()
+        );
+
+
+    apriModal(
+        "📝 RICHIESTA " + tipo,
+        `
+
+        <div class="form-grid">
+
+            <div class="form-group full">
+                <label>Nome e cognome operatore</label>
+
+                <input
+                    id="richOperatore"
+                    type="text"
+                    placeholder="Nome e cognome">
+
+            </div>
+
+            <div class="form-group">
+                <label>Dal</label>
+
+                <input
+                    id="richDal"
+                    type="date"
+                    value="${oggi}">
+
+            </div>
+
+            <div class="form-group">
+                <label>Al</label>
+
+                <input
+                    id="richAl"
+                    type="date"
+                    value="${oggi}">
+
+            </div>
+
+            <div class="form-group full">
+                <label>Note</label>
+
+                <textarea
+                    id="richNote"
+                    placeholder="Eventuali note"></textarea>
+
+            </div>
+
+        </div>
+
+        <div class="modal-buttons">
+
+            <button
+                class="btn-chiudi"
+                onclick="chiudiModal()">
+                ANNULLA
+            </button>
+
+            <button
+                class="btn-richiesta"
+                onclick="inviaRichiestaAssenza('${escapeHtml(tipo)}')">
+                INVIA RICHIESTA
+            </button>
+
+        </div>
+
+        `
+    );
+
+}
+
+
+function inviaRichiestaAssenza(
+    tipo
+) {
+
+    const operatore =
+        testo(
+            document.getElementById(
+                "richOperatore"
+            ).value
+        );
+
+
+    const dal =
+        testo(
+            document.getElementById(
+                "richDal"
+            ).value
+        );
+
+
+    const al =
+        testo(
+            document.getElementById(
+                "richAl"
+            ).value
+        );
+
+
+    const note =
+        testo(
+            document.getElementById(
+                "richNote"
+            ).value
+        );
+
+
+    if (
+        !operatore ||
+        !dal ||
+        !al
+    ) {
+
+        alert(
+            "Compila operatore e date."
+        );
+
+        return;
+
+    }
+
+
+    const richiesta = {
+
+        id:
+            "RICH_" +
+            Date.now() +
+            "_" +
+            Math.random()
+                .toString(36)
+                .substring(2,7),
+
+        tipo:
+            tipo,
+
+        operatore:
+            operatore,
+
+        data:
+            dal,
+
+        dal:
+            dal,
+
+        al:
+            al,
+
+        postazione:
+            "",
+
+        turno:
+            "",
+
+        destinatario:
+            "",
+
+        turnoDestinazione:
+            "",
+
+        turnoId:
+            "",
+
+        turnoDestId:
+            "",
+
+        note:
+            note,
+
+        stato:
+            "IN ATTESA",
+
+        dataRichiesta:
+            new Date().toLocaleString("it-IT")
+
+    };
+
+
+    richieste.push(
+        richiesta
+    );
+
+
+    salvaRichiesteLocali();
+
+    aggiornaContatoriRichieste();
+
+    chiudiModal();
+
+
+    alert(
+        "RICHIESTA INVIATA.\n\n" +
+        "Stato: IN ATTESA"
+    );
+
+}
+
+
+/* ============================================================
+   PULSANTI RICHIESTE
+   ============================================================ */
+
+document
+    .getElementById(
+        "btnFerie"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            apriRichiestaAssenza(
+                "FERIE"
+            );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "btn104"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            apriRichiestaAssenza(
+                "104"
+            );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "btnMalattia"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            apriRichiestaAssenza(
+                "MALATTIA"
+            );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "btnAltraAssenza"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            apriRichiestaAssenza(
+                "ALTRA ASSENZA"
+            );
+
+        }
+    );
+
+
+/* ============================================================
+   RICHIESTA CAMBIO TURNO
+   ============================================================ */
+
+document
+    .getElementById(
+        "btnCambioRichiesta"
+    )
+    .addEventListener(
+        "click",
+        apriRichiestaCambio
+    );
+
+
+function apriRichiestaCambio() {
+
+    const oggi =
+        formatData(
+            new Date()
+        );
+
+
+    apriModal(
+        "🔄 RICHIESTA CAMBIO TURNO",
+        `
+
+        <div class="form-grid">
+
+            <div class="form-group full">
+                <label>Nome e cognome richiedente</label>
+
+                <input
+                    id="crOperatore"
+                    type="text"
+                    placeholder="Nome e cognome">
+
+            </div>
+
+            <div class="form-group full">
+                <label>Data del cambio</label>
+
+                <input
+                    id="crData"
+                    type="date"
+                    value="${oggi}"
+                    onchange="caricaSelettoriRichiestaCambio()">
+
+            </div>
+
+            <div class="form-group">
+                <label>Il mio turno</label>
+
+                <select
+                    id="crTurno1">
+                </select>
+
+            </div>
+
+            <div class="form-group">
+                <label>Scambio con</label>
+
+                <select
+                    id="crTurno2">
+                </select>
+
+            </div>
+
+            <div class="form-group full">
+                <label>Note</label>
+
+                <textarea
+                    id="crNote"></textarea>
+
+            </div>
+
+        </div>
+
+        <div class="modal-buttons">
+
+            <button
+                class="btn-chiudi"
+                onclick="chiudiModal()">
+                ANNULLA
+            </button>
+
+            <button
+                class="btn-cambio"
+                onclick="inviaRichiestaCambio()">
+                INVIA RICHIESTA
+            </button>
+
+        </div>
+
+        `
+    );
+
+
+    caricaSelettoriRichiestaCambio();
+
+}
+
+
+function caricaSelettoriRichiestaCambio() {
+
+    const data =
+        document.getElementById(
+            "crData"
+        ).value;
+
+
+    const select1 =
+        document.getElementById(
+            "crTurno1"
+        );
+
+
+    const select2 =
+        document.getElementById(
+            "crTurno2"
+        );
+
+
+    if (!select1 || !select2) {
+        return;
+    }
+
+
+    let opzioni = [];
+
+
+    if (turni[data]) {
+
+        for (
+            const postazioneId in
+            turni[data]
+        ) {
+
+            const postazione =
+                postazionePerId(
+                    postazioneId
+                );
+
+
+            turni[data][postazioneId]
+                .forEach(
+                    function(t) {
+
+                        opzioni.push({
+
+                            id:
+                                t.id,
+
+                            nome:
+                                t.nome,
+
+                            testo:
+                                (postazione
+                                    ? postazione.nome
+                                    : postazioneId) +
+                                " - " +
+                                t.nome +
+                                " - " +
+                                t.entrata +
+                                " / " +
+                                t.uscita
+
+                        });
+
+                    }
+                );
+
+        }
+
+    }
+
+
+    const html =
+        opzioni.map(
+            function(o) {
+
+                return `
+                <option value="${escapeHtml(o.id)}">
+                    ${escapeHtml(o.testo)}
+                </option>
+                `;
+
+            }
+        ).join("");
+
+
+    select1.innerHTML =
+        html;
+
+
+    select2.innerHTML =
+        html;
+
+}
+
+
+function inviaRichiestaCambio() {
+
+    const operatore =
+        testo(
+            document.getElementById(
+                "crOperatore"
+            ).value
+        );
+
+
+    const data =
+        testo(
+            document.getElementById(
+                "crData"
+            ).value
+        );
+
+
+    const turnoId =
+        testo(
+            document.getElementById(
+                "crTurno1"
+            ).value
+        );
+
+
+    const turnoDestId =
+        testo(
+            document.getElementById(
+                "crTurno2"
+            ).value
+        );
+
+
+    const note =
+        testo(
+            document.getElementById(
+                "crNote"
+            ).value
+        );
+
+
+    if (
+        !operatore ||
+        !data ||
+        !turnoId ||
+        !turnoDestId
+    ) {
+
+        alert(
+            "Compila tutti i campi."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        turnoId ===
+        turnoDestId
+    ) {
+
+        alert(
+            "Devi scegliere due turni diversi."
+        );
+
+        return;
+
+    }
+
+
+    const a =
+        trovaTurnoPerId(
+            turnoId
+        );
+
+
+    const b =
+        trovaTurnoPerId(
+            turnoDestId
+        );
+
+
+    if (!a || !b) {
+
+        alert(
+            "Turno non trovato."
+        );
+
+        return;
+
+    }
+
+
+    richieste.push({
+
+        id:
+            "RICH_" +
+            Date.now() +
+            "_" +
+            Math.random()
+                .toString(36)
+                .substring(2,7),
+
+        tipo:
+            "CAMBIO TURNO",
+
+        operatore:
+            operatore,
+
+        data:
+            data,
+
+        dal:
+            "",
+
+        al:
+            "",
+
+        postazione:
+            a.postazioneId,
+
+        turno:
+            a.turno.nome,
+
+        destinatario:
+            b.turno.nome,
+
+        turnoDestinazione:
+            b.postazioneId,
+
+        turnoId:
+            turnoId,
+
+        turnoDestId:
+            turnoDestId,
+
+        note:
+            note,
+
+        stato:
+            "IN ATTESA",
+
+        dataRichiesta:
+            new Date().toLocaleString("it-IT")
+
+    });
+
+
+    salvaRichiesteLocali();
+
+    aggiornaContatoriRichieste();
+
+    chiudiModal();
+
+
+    alert(
+        "RICHIESTA CAMBIO INVIATA.\n\n" +
+        "Stato: IN ATTESA"
+    );
+
+}
+
+
+/* ============================================================
+   RICHIESTE AMMINISTRATORE
+   ============================================================ */
+
+let filtroRichiesteAttuale = null;
+
+
+const TIPI_RICHIESTA_PER_CATEGORIA = {
+
+    FERIE: ["FERIE"],
+
+    104: ["104"],
+
+    MALATTIA: ["MALATTIA"],
+
+    ALTRO: ["ALTRA ASSENZA"],
+
+    CAMBIO: ["CAMBIO TURNO"]
+
+};
+
+
+document
+    .getElementById(
+        "btnRichiesteFerie"
+    )
+    .addEventListener(
+        "click",
+        function() {
+            apriRichieste("FERIE");
+        }
+    );
+
+
+document
+    .getElementById(
+        "btnRichieste104"
+    )
+    .addEventListener(
+        "click",
+        function() {
+            apriRichieste("104");
+        }
+    );
+
+
+document
+    .getElementById(
+        "btnRichiesteMalattia"
+    )
+    .addEventListener(
+        "click",
+        function() {
+            apriRichieste("MALATTIA");
+        }
+    );
+
+
+document
+    .getElementById(
+        "btnRichiesteAltro"
+    )
+    .addEventListener(
+        "click",
+        function() {
+            apriRichieste("ALTRO");
+        }
+    );
+
+
+document
+    .getElementById(
+        "btnRichiesteCambio"
+    )
+    .addEventListener(
+        "click",
+        function() {
+            apriRichieste("CAMBIO");
+        }
+    );
+
+
+function aggiornaContatoriRichieste() {
+
+    const mappaSpan = {
+
+        FERIE: "numFerie",
+
+        104: "num104",
+
+        MALATTIA: "numMalattia",
+
+        ALTRO: "numAltro",
+
+        CAMBIO: "numCambio"
+
+    };
+
+
+    Object.keys(
+        TIPI_RICHIESTA_PER_CATEGORIA
+    ).forEach(
+        function(categoria) {
+
+            const tipiValidi =
+                TIPI_RICHIESTA_PER_CATEGORIA[
+                    categoria
+                ];
+
+
+            const numero =
+                richieste.filter(
+                    function(r) {
+
+                        return (
+                            r.stato === "IN ATTESA" &&
+                            tipiValidi.indexOf(r.tipo) !== -1
+                        );
+
+                    }
+                ).length;
+
+
+            const elemento =
+                document.getElementById(
+                    mappaSpan[categoria]
+                );
+
+
+            if (!elemento) {
+                return;
+            }
+
+
+            elemento.innerHTML =
+                numero > 0
+                    ? `<span class="notifica">${numero}</span>`
+                    : "";
+
+        }
+    );
+
+}
+
+
+function apriRichieste(tipoFiltro) {
+
+    if (!amministratore) {
+        return;
+    }
+
+
+    filtroRichiesteAttuale =
+        tipoFiltro || null;
+
+
+    const tipiValidi =
+        tipoFiltro
+            ? TIPI_RICHIESTA_PER_CATEGORIA[tipoFiltro]
+            : null;
+
+
+    const elenco =
+        tipiValidi
+            ? richieste.filter(
+                function(r) {
+                    return tipiValidi.indexOf(r.tipo) !== -1;
+                }
+            )
+            : richieste;
+
+
+    let html = "";
+
+
+    if (
+        elenco.length === 0
+    ) {
+
+        html =
+            "<p>Nessuna richiesta presente.</p>";
+
+    }
+
+    else {
+
+        elenco
+            .slice()
+            .reverse()
+            .forEach(
+                function(r) {
+
+                    const classe =
+                        r.stato ===
+                        "APPROVATA"
+                            ? "approvata"
+                            : r.stato ===
+                              "RIFIUTATA"
+                                ? "rifiutata"
+                                : "in-attesa";
+
+
+                    html += `
+
+                    <div class="richiesta-card ${classe}">
+
+                        <h3>
+                            ${escapeHtml(r.tipo)}
+                        </h3>
+
+                        <p>
+                            <strong>Operatore:</strong>
+                            ${escapeHtml(r.operatore)}
+                        </p>
+
+                        ${
+                            r.dal
+                                ? `
+                                <p>
+                                    <strong>Dal:</strong>
+                                    ${escapeHtml(r.dal)}
+                                    &nbsp;
+                                    <strong>Al:</strong>
+                                    ${escapeHtml(r.al)}
+                                </p>
+                                `
+                                : ""
+                        }
+
+                        ${
+                            r.data
+                                ? `
+                                <p>
+                                    <strong>Data:</strong>
+                                    ${escapeHtml(r.data)}
+                                </p>
+                                `
+                                : ""
+                        }
+
+                        ${
+                            r.destinatario
+                                ? `
+                                <p>
+                                    <strong>Cambio con:</strong>
+                                    ${escapeHtml(r.destinatario)}
+                                </p>
+                                `
+                                : ""
+                        }
+
+                        ${
+                            r.note
+                                ? `
+                                <p>
+                                    <strong>Note:</strong>
+                                    ${escapeHtml(r.note)}
+                                </p>
+                                `
+                                : ""
+                        }
+
+                        <p>
+                            <strong>Stato:</strong>
+                            ${escapeHtml(r.stato)}
+                        </p>
+
+                        <p>
+                            <strong>Richiesta:</strong>
+                            ${escapeHtml(r.dataRichiesta)}
+                        </p>
+
+                        ${
+                            r.stato === "IN ATTESA"
+                                ? `
+                                <div class="modal-buttons">
+
+                                    <button
+                                        class="btn-salva"
+                                        onclick="approvaRichiesta('${escapeHtml(r.id)}')">
+                                        ✅ APPROVA
+                                    </button>
+
+                                    <button
+                                        class="btn-elimina"
+                                        onclick="rifiutaRichiesta('${escapeHtml(r.id)}')">
+                                        ❌ RIFIUTA
+                                    </button>
+
+                                </div>
+                                `
+                                : ""
+                        }
+
+                    </div>
+
+                    `;
+
+                }
+            );
+
+    }
+
+
+    apriModal(
+        "📋 RICHIESTE",
+        html
+    );
+
+}
+
+
+/* ============================================================
+   APPROVA RICHIESTA
+   ============================================================ */
+
+function approvaRichiesta(
+    id
+) {
+
+    const richiesta =
+        richieste.find(
+            function(r) {
+                return r.id === id;
+            }
+        );
+
+
+    if (!richiesta) {
+        return;
+    }
+
+
+    if (
+        richiesta.tipo ===
+        "CAMBIO TURNO"
+    ) {
+
+        const a =
+            trovaTurnoPerId(
+                richiesta.turnoId
+            );
+
+
+        const b =
+            trovaTurnoPerId(
+                richiesta.turnoDestId
+            );
+
+
+        if (
+            a &&
+            b
+        ) {
+
+            const nomeA =
+                a.turno.nome;
+
+
+            const nomeB =
+                b.turno.nome;
+
+
+            a.turno.nome =
+                nomeB;
+
+
+            b.turno.nome =
+                nomeA;
+
+
+            salvaDatiLocali();
+
+        }
+
+    }
+
+
+    richiesta.stato =
+        "APPROVATA";
+
+
+    salvaRichiesteLocali();
+
+    aggiornaContatoriRichieste();
+
+    apriRichieste(filtroRichiesteAttuale);
+
+    visualizza();
+
+}
+
+
+/* ============================================================
+   RIFIUTA
+   ============================================================ */
+
+function rifiutaRichiesta(
+    id
+) {
+
+    const richiesta =
+        richieste.find(
+            function(r) {
+                return r.id === id;
+            }
+        );
+
+
+    if (!richiesta) {
+        return;
+    }
+
+
+    richiesta.stato =
+        "RIFIUTATA";
+
+
+    salvaRichiesteLocali();
+
+    aggiornaContatoriRichieste();
+
+    apriRichieste(filtroRichiesteAttuale);
+
+}
+
+
+/* ============================================================
+   SALVA EXCEL
+   ============================================================ */
+
+document
+    .getElementById(
+        "btnSalva"
+    )
+    .addEventListener(
+        "click",
+        salvaExcel
+    );
+
+
+function salvaExcel() {
+
+    if (!amministratore) {
+
+        alert(
+            "Solo l'amministratore può salvare."
+        );
+
+        return;
+
+    }
+
+
+    if (!workbookCaricato) {
+
+        /*
+           Se i turni provengono dal salvataggio
+           locale (localStorage) e non da un Excel
+           caricato in questa sessione, si crea un
+           workbook nuovo così il salvataggio
+           funziona comunque.
+        */
+
+        workbookCaricato =
+            XLSX.utils.book_new();
+
+    }
+
+
+    /*
+       ---------------------------------------------------------
+       APP_TURNI
+       ---------------------------------------------------------
+    */
+
+    const righeTurni = [];
+
+
+    for (
+        const data in turni
+    ) {
+
+        for (
+            const postazioneId in
+            turni[data]
+        ) {
+
+            turni[data][postazioneId]
+                .forEach(
+                    function(t) {
+
+                        righeTurni.push({
+
+                            DATA:
+                                data,
+
+                            POSTAZIONE:
+                                postazioneId,
+
+                            NOME:
+                                t.nome,
+
+                            ENTRATA:
+                                t.entrata,
+
+                            USCITA:
+                                t.uscita,
+
+                            ORE:
+                                t.ore,
+
+                            ID:
+                                t.id
+
+                        });
+
+                    }
+                );
+
+        }
+
+    }
+
+
+    const wsTurni =
+        XLSX.utils.json_to_sheet(
+            righeTurni
+        );
+
+
+    sostituisciFoglio(
+        workbookCaricato,
+        "APP_TURNI",
+        wsTurni
+    );
+
+
+    /*
+       ---------------------------------------------------------
+       APP_ASSENZE
+       ---------------------------------------------------------
+    */
+
+    const righeAssenze = [];
+
+
+    for (
+        const data in assenze
+    ) {
+
+        for (
+            const postazioneId in
+            assenze[data]
+        ) {
+
+            assenze[data][postazioneId]
+                .forEach(
+                    function(a) {
+
+                        righeAssenze.push({
+
+                            DATA:
+                                data,
+
+                            POSTAZIONE:
+                                postazioneId,
+
+                            NOME:
+                                a.nome,
+
+                            TIPO:
+                                a.tipo
+
+                        });
+
+                    }
+                );
+
+        }
+
+    }
+
+
+    const wsAssenze =
+        XLSX.utils.json_to_sheet(
+            righeAssenze
+        );
+
+
+    sostituisciFoglio(
+        workbookCaricato,
+        "APP_ASSENZE",
+        wsAssenze
+    );
+
+
+    /*
+       ---------------------------------------------------------
+       APP_RICHIESTE
+       ---------------------------------------------------------
+    */
+
+    const righeRichieste =
+        richieste.map(
+            function(r) {
+
+                return {
+
+                    ID:
+                        r.id,
+
+                    TIPO:
+                        r.tipo,
+
+                    OPERATORE:
+                        r.operatore,
+
+                    DATA:
+                        r.data,
+
+                    DAL:
+                        r.dal,
+
+                    AL:
+                        r.al,
+
+                    POSTAZIONE:
+                        r.postazione,
+
+                    TURNO:
+                        r.turno,
+
+                    DESTINATARIO:
+                        r.destinatario,
+
+                    TURNO_DESTINAZIONE:
+                        r.turnoDestinazione,
+
+                    TURNO_ID:
+                        r.turnoId,
+
+                    TURNO_DEST_ID:
+                        r.turnoDestId,
+
+                    NOTE:
+                        r.note,
+
+                    STATO:
+                        r.stato,
+
+                    DATA_RICHIESTA:
+                        r.dataRichiesta
+
+                };
+
+            }
+        );
+
+
+    const wsRichieste =
+        XLSX.utils.json_to_sheet(
+            righeRichieste
+        );
+
+
+    sostituisciFoglio(
+        workbookCaricato,
+        "APP_RICHIESTE",
+        wsRichieste
+    );
+    scriviOperatoriEPdfNelWorkbook(workbookCaricato);
+
+
+    /*
+       ---------------------------------------------------------
+       SALVATAGGIO FILE
+       ---------------------------------------------------------
+    */
+
+    let base =
+        (nomeFileOriginale || "Turni")
+            .replace(
+                /\.(xlsx|xlsm|xls)$/i,
+                ""
+            );
+
+
+    let estensione =
+        /\.xlsm$/i.test(
+            nomeFileOriginale
+        )
+            ? ".xlsm"
+            : ".xlsx";
+
+
+    if (
+        /\.xls$/i.test(
+            nomeFileOriginale
+        )
+    ) {
+
+        estensione =
+            ".xlsx";
+
+    }
+
+
+    const oggi =
+        new Date();
+
+
+    const stamp =
+        oggi.getFullYear() +
+        String(
+            oggi.getMonth() + 1
+        ).padStart(2,"0") +
+        String(
+            oggi.getDate()
+        ).padStart(2,"0");
+
+
+    const nomeSalvataggio =
+        base +
+        "_AGGIORNATO_" +
+        stamp +
+        estensione;
+
+
+    try {
+
+        XLSX.writeFile(
+            workbookCaricato,
+            nomeSalvataggio,
+            {
+
+                bookType:
+                    estensione === ".xlsm"
+                        ? "xlsm"
+                        : "xlsx",
+
+                bookVBA:
+                    true
+
+            }
+        );
+
+
+        document
+            .getElementById(
+                "stato"
+            )
+            .textContent =
+                "FILE SALVATO: " +
+                nomeSalvataggio;
+
+
+        alert(
+            "SALVATAGGIO COMPLETATO.\n\n" +
+            nomeSalvataggio +
+            "\n\n" +
+            "Dentro ci sono turni, RICHIESTE, OPERATORI/PIN e PDF.\n" +
+            "Carica questo file al posto del vecchio Excel online: " +
+            "da quel momento lo vedranno tutti."
+        );
+
+    }
+    catch(e) {
+
+        console.error(e);
+
+        alert(
+            "Errore durante il salvataggio del file.\n\n" +
+            e.message
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   SOSTITUISCI FOGLIO
+   ============================================================ */
+
+function sostituisciFoglio(
+    workbook,
+    nomeFoglio,
+    worksheet
+) {
+
+    const indice =
+        workbook.SheetNames.indexOf(
+            nomeFoglio
+        );
+
+
+    if (indice !== -1) {
+
+        workbook.SheetNames.splice(
+            indice,
+            1
+        );
+
+        delete workbook.Sheets[
+            nomeFoglio
+        ];
+
+    }
+
+
+    XLSX.utils.book_append_sheet(
+        workbook,
+        worksheet,
+        nomeFoglio
+    );
+
+}
+
+
+/* ============================================================
+   PULSANTI SETTIMANA
+   ============================================================ */
+
+document
+    .getElementById(
+        "btnSettimanaScorsa"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            modalita =
+                "settimana";
+
+            offsetSettimana =
+                Math.max(
+                    -1,
+                    offsetSettimana - 1
+                );
+
+            visualizza();
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "btnSettimana"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            modalita =
+                "settimana";
+
+            offsetSettimana =
+                0;
+
+            visualizza();
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "btnSettimanaProssima"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            modalita =
+                "settimana";
+
+            offsetSettimana =
+                Math.min(
+                    1,
+                    offsetSettimana + 1
+                );
+
+            visualizza();
+
+        }
+    );
+
+
+/* ============================================================
+   PULSANTI GIORNI
+   ============================================================ */
+
+document
+    .getElementById(
+        "btnIeri"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            modalita =
+                "giorno";
+
+            offsetGiorno =
+                -1;
+
+            visualizza();
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "btnOggi"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            modalita =
+                "giorno";
+
+            offsetGiorno =
+                0;
+
+            visualizza();
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "btnDomani"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            modalita =
+                "giorno";
+
+            offsetGiorno =
+                1;
+
+            visualizza();
+
+        }
+    );
+
+
+/* ============================================================
+   STAMPA
+   ============================================================ */
+
+document
+    .getElementById(
+        "btnStampa"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            window.print();
+
+        }
+    );
+
+
+/* ============================================================
+   SCARICA PDF
+   ============================================================ */
+
+document
+    .getElementById(
+        "btnPdf"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            const elemento =
+                document.getElementById(
+                    "risultati"
+                );
+
+            if (!elemento) {
+
+                alert(
+                    "Nessun contenuto da esportare."
+                );
+
+                return;
+
+            }
+
+            const oggi =
+                new Date();
+
+            const stamp =
+                oggi.getFullYear() +
+                String(
+                    oggi.getMonth() + 1
+                ).padStart(2,"0") +
+                String(
+                    oggi.getDate()
+                ).padStart(2,"0");
+
+            const nomeFilePdf =
+                "Turni_" +
+                stamp +
+                ".pdf";
+
+            const bottone =
+                document.getElementById(
+                    "btnPdf"
+                );
+
+            const testoOriginale =
+                bottone.textContent;
+
+            bottone.textContent =
+                "⏳ GENERAZIONE PDF...";
+
+            bottone.disabled =
+                true;
+
+            const opzioni = {
+
+                margin:
+                    8,
+
+                filename:
+                    nomeFilePdf,
+
+                image: {
+                    type: "jpeg",
+                    quality: 0.98
+                },
+
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true
+                },
+
+                jsPDF: {
+                    unit: "mm",
+                    format: "a4",
+                    orientation: "portrait"
+                },
+
+                pagebreak: {
+                    mode: ["css", "avoid-all"]
+                }
+
+            };
+
+            html2pdf()
+                .set(opzioni)
+                .from(elemento)
+                .save()
+                .then(function() {
+
+                    bottone.textContent =
+                        testoOriginale;
+
+                    bottone.disabled =
+                        false;
+
+                })
+                .catch(function(e) {
+
+                    console.error(e);
+
+                    alert(
+                        "Errore durante la generazione del PDF.\n\n" +
+                        e.message
+                    );
+
+                    bottone.textContent =
+                        testoOriginale;
+
+                    bottone.disabled =
+                        false;
+
+                });
+
+        }
+    );
+
+
+/* ============================================================
+   CHIUSURA MODAL CLICCANDO FUORI
+   ============================================================ */
+
+document
+    .getElementById(
+        "modal"
+    )
+    .addEventListener(
+        "click",
+        function(e) {
+
+            if (
+                e.target ===
+                this
+            ) {
+
+                chiudiModal();
+
+            }
+
+        }
+    );
+
+
+/* ============================================================
+   STATO INIZIALE
+   ============================================================ */
+
+/* ============================================================
+   CARTELLA CONDIVISA (turni.xlsx, operatori.json, pdf/NOME.pdf)
+   ============================================================ */
+
+
+/* ============================================================
+   CONDIVISIONE VIA EXCEL: OPERATORI/PIN, PDF E RICHIESTE
+   Tutto viene scritto / letto nello STESSO file Excel caricato
+   (fogli APP_OPERATORI, APP_PDF, APP_RICHIESTE).
+   ============================================================ */
+let pdfDaFile = {};
+const DIM_PARTE_PDF = 30000;
+
+function getPdfOperatori() {
+    return Object.assign({}, pdfDaFile, getPdfOperatoriLocali());
+}
+
+function richiesteComeRighe() {
+    return richieste.map(function(r) {
+        return {
+            ID: r.id, TIPO: r.tipo, OPERATORE: r.operatore,
+            DATA: r.data, DAL: r.dal, AL: r.al,
+            POSTAZIONE: r.postazione, TURNO: r.turno,
+            DESTINATARIO: r.destinatario,
+            TURNO_DESTINAZIONE: r.turnoDestinazione,
+            TURNO_ID: r.turnoId, TURNO_DEST_ID: r.turnoDestId,
+            NOTE: r.note, STATO: r.stato,
+            DATA_RICHIESTA: r.dataRichiesta
+        };
+    });
+}
+
+function rigaARichiesta(riga) {
+    return {
+        id: testo(riga.ID) || generaIdTurno(),
+        tipo: testo(riga.TIPO), operatore: testo(riga.OPERATORE),
+        data: testo(riga.DATA), dal: testo(riga.DAL), al: testo(riga.AL),
+        postazione: testo(riga.POSTAZIONE), turno: testo(riga.TURNO),
+        destinatario: testo(riga.DESTINATARIO),
+        turnoDestinazione: testo(riga.TURNO_DESTINAZIONE),
+        turnoId: testo(riga.TURNO_ID), turnoDestId: testo(riga.TURNO_DEST_ID),
+        note: testo(riga.NOTE),
+        stato: testo(riga.STATO) || "IN ATTESA",
+        dataRichiesta: testo(riga.DATA_RICHIESTA)
+    };
+}
+
+function scriviOperatoriEPdfNelWorkbook(wb) {
+    const ops = getOperatoriPin().map(function(o) {
+        return { NOME: o.nome, PIN: o.pin };
+    });
+    sostituisciFoglio(wb, "APP_OPERATORI",
+        XLSX.utils.json_to_sheet(ops, { header: ["NOME", "PIN"] }));
+
+    const archivio = getPdfOperatori();
+    const righe = [];
+    Object.keys(archivio).forEach(function(k) {
+        const v = archivio[k];
+        const s = v.dataUrl || "";
+        if (!s) { return; }
+        const parti = Math.max(1, Math.ceil(s.length / DIM_PARTE_PDF));
+        for (let i = 0; i < parti; i++) {
+            righe.push({
+                CHIAVE: k, NOME: v.nome, NOME_FILE: v.nomeFile,
+                CARICATO_IL: v.caricatoIl,
+                PARTE: i + 1, TOTALE_PARTI: parti,
+                DATI: s.substr(i * DIM_PARTE_PDF, DIM_PARTE_PDF)
+            });
+        }
+    });
+    sostituisciFoglio(wb, "APP_PDF",
+        XLSX.utils.json_to_sheet(righe, {
+            header: ["CHIAVE","NOME","NOME_FILE","CARICATO_IL","PARTE","TOTALE_PARTI","DATI"]
+        }));
+}
+
+function caricaOperatoriEPdfDalWorkbook(wb) {
+    try {
+        const wsO = wb.Sheets["APP_OPERATORI"];
+        if (wsO) {
+            const lista = getOperatoriPin();
+            XLSX.utils.sheet_to_json(wsO, { defval: "", raw: false })
+                .forEach(function(r) {
+                    const nome = testo(r.NOME);
+                    const pin = testo(r.PIN);
+                    if (!nome || !pin) { return; }
+                    const esiste = lista.some(function(o) {
+                        return normalizza(o.nome) === normalizza(nome);
+                    });
+                    if (!esiste) { lista.push({ nome: nome, pin: pin }); }
+                });
+            try { localStorage.setItem(CHIAVE_OPERATORI, JSON.stringify(lista)); }
+            catch (e) {}
+        }
+        const wsP = wb.Sheets["APP_PDF"];
+        if (wsP) {
+            const gruppi = {};
+            XLSX.utils.sheet_to_json(wsP, { defval: "", raw: false })
+                .forEach(function(r) {
+                    const k = String(r.CHIAVE || "").trim();
+                    if (!k) { return; }
+                    if (!gruppi[k]) {
+                        gruppi[k] = { meta: r, parti: {},
+                                      tot: Number(r.TOTALE_PARTI) || 1 };
+                    }
+                    gruppi[k].parti[Number(r.PARTE) || 1] = String(r.DATI || "");
+                });
+            const nuovi = {};
+            Object.keys(gruppi).forEach(function(k) {
+                const g = gruppi[k];
+                let s = "";
+                for (let i = 1; i <= g.tot; i++) {
+                    if (g.parti[i] === undefined) { s = ""; break; }
+                    s += g.parti[i];
+                }
+                if (s) {
+                    nuovi[k] = {
+                        nome: String(g.meta.NOME || k),
+                        nomeFile: String(g.meta.NOME_FILE || (k + ".pdf")),
+                        dataUrl: s,
+                        caricatoIl: String(g.meta.CARICATO_IL || "")
+                    };
+                }
+            });
+            pdfDaFile = nuovi;
+        }
+    } catch (e) {
+        console.warn("Lettura operatori/PDF dal file non riuscita.", e);
+    }
+}
+
+function esportaMieRichieste() {
+    if (!richieste.length) {
+        alert("Non ci sono richieste da esportare.");
+        return;
+    }
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(
+        wb, XLSX.utils.json_to_sheet(richiesteComeRighe()), "APP_RICHIESTE");
+    const o = new Date();
+    const stamp = o.getFullYear() +
+        String(o.getMonth() + 1).padStart(2, "0") +
+        String(o.getDate()).padStart(2, "0");
+    XLSX.writeFile(wb, "RICHIESTE_" + stamp + ".xlsx");
+}
+
+function importaRichiesteDaExcel(event) {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) { return; }
+    let lette = 0, aggiunte = 0;
+    Promise.all(files.map(function(f) {
+        return f.arrayBuffer().then(function(buf) {
+            const wb = XLSX.read(new Uint8Array(buf), { type: "array" });
+            const ws = wb.Sheets["APP_RICHIESTE"];
+            if (!ws) { return; }
+            XLSX.utils.sheet_to_json(ws, { defval: "", raw: false })
+                .forEach(function(riga) {
+                    const id = testo(riga.ID);
+                    if (!id) { return; }
+                    lette++;
+                    if (richieste.some(function(x) { return x.id === id; })) { return; }
+                    richieste.push(rigaARichiesta(riga));
+                    aggiunte++;
+                });
+        });
+    })).then(function() {
+        salvaRichiesteLocali();
+        aggiornaContatoriRichieste();
+        visualizza();
+        alert("Richieste lette: " + lette + "\nNuove aggiunte: " + aggiunte +
+              (aggiunte ? "\n\nPremi 💾 SALVA per scriverle nel file Excel." : ""));
+        event.target.value = "";
+    }).catch(function(e) {
+        alert("Errore nella lettura del file: " + e.message);
+    });
+}
+
+(function aggiungiBottoniRichiesteExcel() {
+    const rigaOp = document.getElementById("rigaRichiesteOperatore");
+    if (rigaOp) {
+        const b = document.createElement("button");
+        b.className = "btn-salva";
+        b.textContent = "📤 ESPORTA LE MIE RICHIESTE (EXCEL)";
+        b.addEventListener("click", esportaMieRichieste);
+        rigaOp.appendChild(b);
+    }
+    const rigaAd = document.getElementById("rigaCaricaExcel");
+    if (rigaAd) {
+        const inp = document.createElement("input");
+        inp.type = "file";
+        inp.accept = ".xlsx,.xls,.xlsm";
+        inp.multiple = true;
+        inp.style.display = "none";
+        inp.addEventListener("change", importaRichiesteDaExcel);
+        const b = document.createElement("button");
+        b.className = "btn-richiesta";
+        b.textContent = "📥 IMPORTA RICHIESTE DA EXCEL";
+        b.addEventListener("click", function() { inp.click(); });
+        rigaAd.appendChild(inp);
+        rigaAd.appendChild(b);
+    }
+})();
+
+function fetchConFallback(urlOnline, urlLocale) {
+    const tenta = function(u) {
+        return fetch(
+            u + (u.indexOf("?") === -1 ? "?" : "&") + "t=" + Date.now(),
+            { cache: "no-store" }
+        );
+    };
+    const locale = function() {
+        origini[urlLocale] = "copia nella cartella del sito";
+        return tenta(urlLocale);
+    };
+    if (!urlOnline) { return locale(); }
+    return tenta(urlOnline)
+        .then(function(r) {
+            const tipo = r.headers.get("content-type") || "";
+            if (r.ok && !/text\/html/i.test(tipo)) {
+                origini[urlLocale] = "file online (Google)";
+                return r;
+            }
+            return locale();
+        })
+        .catch(function() { return locale(); });
+}
+
+async function apriPdfDaCartella(nome) {
+    const nomi = [nome, normalizza(nome)];
+    for (const n of nomi) {
+        try {
+            const r = await fetch(
+                "pdf/" + encodeURIComponent(n) + ".pdf",
+                { cache: "no-store" }
+            );
+            const tipo = r.headers.get("content-type") || "";
+            if (r.ok && !/text\/html/i.test(tipo)) {
+                const blob = await r.blob();
+                window.open(URL.createObjectURL(blob), "_blank");
+                return;
+            }
+        } catch (e) {}
+    }
+    alert(
+        "Nessun PDF trovato per " + nome + ".\n" +
+        "L'amministratore non lo ha ancora caricato."
+    );
+}
+
+function scaricaOperatoriJson() {
+    const blob = new Blob(
+        [JSON.stringify(getOperatoriPin(), null, 1)],
+        { type: "application/json" }
+    );
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "operatori.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+(function aggiungiBottoneOperatoriJson() {
+    const riga = document.getElementById("rigaCaricaExcel");
+    if (!riga) { return; }
+    const b = document.createElement("button");
+    b.className = "btn-salva";
+    b.textContent = "⬇ SCARICA operatori.json (per la cartella)";
+    b.addEventListener("click", scaricaOperatoriJson);
+    riga.appendChild(b);
+})();
+
+(async function autoCaricaDaCartella() {
+    if (location.protocol === "file:") { return; }
+    const stato = document.getElementById("stato");
+    try {
+        const r = await fetchConFallback(URL_OPERATORI_ONLINE, "operatori.json");
+        if (r.ok) {
+            const lista = await r.json();
+            if (Array.isArray(lista)) {
+                localStorage.setItem(CHIAVE_OPERATORI, JSON.stringify(lista));
+            }
+        }
+    } catch (e) {}
+    try {
+        const r = await fetchConFallback(URL_TURNI_ONLINE, "turni.xlsx");
+        const tipo = r.headers.get("content-type") || "";
+        if (r.ok && !/text\/html/i.test(tipo)) {
+            const blob = await r.blob();
+            const file = new File([blob], "turni.xlsx");
+            caricaExcel({ target: { files: [file] } });
+        } else if (stato) {
+            stato.textContent = "turni.xlsx non trovato nella cartella.";
+        }
+    } catch (e) {
+        if (stato) { stato.textContent = "Impossibile leggere turni.xlsx dalla cartella."; }
+    }
+})();
+
+creaBottoniPostazioni();
+aggiornaBottoniPostazioni();
+
+function limiteMese() { return amministratore ? 12 : 1; }
+
+document.getElementById("btnMese").addEventListener("click", function() {
+    modalita = "mese";
+    offsetMese = 0;
+    visualizza();
+});
+
+document.getElementById("btnMeseScorso").addEventListener("click", function() {
+    modalita = "mese";
+    offsetMese = Math.max(-limiteMese(), offsetMese - 1);
+    visualizza();
+});
+
+document.getElementById("btnMeseProssimo").addEventListener("click", function() {
+    modalita = "mese";
+    offsetMese = Math.min(limiteMese(), offsetMese + 1);
+    visualizza();
+});
+
+document.getElementById("selOperatoreFiltro").addEventListener("change", function() {
+    filtroOperatore = this.value;
+    visualizza();
+});
+
+aggiornaContatoriRichieste();
+
+</script>
+
+<script>
+/* ============================================================
+   TOTALE ORE + ASSENZE + FESTIVI PER OPERATORE
+   Modifica qui i valori se cambiano le regole:
+   ============================================================ */
+(function () {
+    var MIN_ASSENZA = 6 * 60 + 36;   /* ogni assenza vale 6:36 */
+    var MIN_FESTIVO = 6 * 60 + 36;   /* festivo non lavorato pagato 6:36 */
+    var FESTIVI_FISSI = ["01-01","01-06","04-25","05-01","06-02","08-15","11-01","12-08","12-25","12-26"];
+
+    function pasquetta(anno) {
+        var a = anno % 19, b = Math.floor(anno / 100), c = anno % 100;
+        var d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+        var g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+        var i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+        var m = Math.floor((a + 11 * h + 22 * l) / 451);
+        var mese = Math.floor((h + l - 7 * m + 114) / 31);
+        var giorno = ((h + l - 7 * m + 114) % 31) + 1;
+        var d2 = new Date(anno, mese - 1, giorno + 1);
+        return d2;
+    }
+    function chiave(d) {
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+    function eFestivo(d) {
+        var mmgg = chiave(d).slice(5);
+        if (FESTIVI_FISSI.indexOf(mmgg) !== -1) { return true; }
+        return chiave(pasquetta(d.getFullYear())) === chiave(d);
+    }
+    function minDa(s) {
+        var p = String(s || "").split(":");
+        if (p.length < 2) { return 0; }
+        return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
+    }
+    function hhmm(min) {
+        return Math.floor(min / 60) + ":" + String(min % 60).padStart(2, "0");
+    }
+    function esc(s) {
+        return String(s).replace(/[&<>"]/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; });
+    }
+
+    function calcola(dal, al) {
+        var ris = {};
+        function op(n) {
+            var k = normalizza(n);
+            if (!ris[k]) { ris[k] = { nome: n, lav: 0, ass: 0, nAss: 0, fest: 0, nFest: 0, dAss: [], dFest: [] }; }
+            return ris[k];
+        }
+        try { getOperatoriPin().forEach(function (o) { op(o.nome); }); } catch (e) {}
+        Object.keys(turni).forEach(function (d) {
+            Object.keys(turni[d]).forEach(function (p) { turni[d][p].forEach(function (t) { op(t.nome); }); });
+        });
+        Object.keys(assenze).forEach(function (d) {
+            Object.keys(assenze[d]).forEach(function (p) { assenze[d][p].forEach(function (a) { op(a.nome); }); });
+        });
+        var giorno = new Date(dal + "T00:00:00"), fine = new Date(al + "T00:00:00");
+        while (giorno <= fine) {
+            var k = chiave(giorno), fest = eFestivo(giorno);
+            var lavorato = {}, assente = {};
+            if (turni[k]) {
+                Object.keys(turni[k]).forEach(function (p) {
+                    turni[k][p].forEach(function (t) {
+                        var min = minDa(t.ore) || minDa(calcolaOre(t.entrata, t.uscita));
+                        var o = op(t.nome);
+                        o.lav += min;
+                        lavorato[normalizza(t.nome)] = true;
+                    });
+                });
+            }
+            if (assenze[k]) {
+                Object.keys(assenze[k]).forEach(function (p) {
+                    assenze[k][p].forEach(function (a) {
+                        if (normalizza(a.tipo) === "RIPOSO") { return; }
+                        assente[normalizza(a.nome)] = a.tipo || "ASSENZA";
+                    });
+                });
+            }
+            Object.keys(ris).forEach(function (n) {
+                if (lavorato[n]) { return; }
+                if (fest) { ris[n].fest += MIN_FESTIVO; ris[n].nFest++; ris[n].dFest.push(k.slice(8) + "/" + k.slice(5, 7)); }
+                else if (assente[n]) { ris[n].ass += MIN_ASSENZA; ris[n].nAss++; ris[n].dAss.push(k.slice(8) + "/" + k.slice(5, 7) + " " + assente[n]); }
+            });
+            giorno.setDate(giorno.getDate() + 1);
+        }
+        return Object.keys(ris).sort().map(function (k) { return ris[k]; });
+    }
+
+    function righe(dal, al) {
+        return calcola(dal, al).map(function (o) {
+            return [o.nome, hhmm(o.lav), o.nAss, hhmm(o.ass), o.nFest, hhmm(o.fest), hhmm(o.lav + o.ass + o.fest)];
+        });
+    }
+    var INT = ["OPERATORE","ORE LAVORATE","N. ASSENZE","ORE ASSENZE","N. FESTIVI","ORE FESTIVI","TOTALE"];
+
+    function mostra() {
+        var dal = document.getElementById("totDal").value, al = document.getElementById("totAl").value;
+        if (!dal || !al) { return; }
+        var r = righe(dal, al);
+        var h = "<table style='width:100%;border-collapse:collapse;font-size:14px'><tr>" +
+            INT.map(function (t) { return "<th style='background:#1e3a8a;color:#fff;padding:6px;text-align:" + (t==="OPERATORE"?"left":"center") + "'>" + t + "</th>"; }).join("") + "</tr>";
+        r.forEach(function (x) {
+            h += "<tr>" + x.map(function (v, i) {
+                return "<td style='padding:6px;border-bottom:1px solid #e5e7eb;text-align:" + (i===0?"left":"center") + ";" + (i===6?"font-weight:bold;":"") + "'>" + esc(v) + "</td>";
+            }).join("") + "</tr>";
+        });
+        document.getElementById("totTabella").innerHTML = h + "</table>";
+    }
+    function scarica() {
+        var dal = document.getElementById("totDal").value, al = document.getElementById("totAl").value;
+        var ws = XLSX.utils.aoa_to_sheet([INT].concat(righe(dal, al)));
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "TOTALI");
+        XLSX.writeFile(wb, "TOTALI_" + dal + "_" + al + ".xlsx");
+    }
+    function apri() {
+        var m = document.getElementById("totModal");
+        if (!m) {
+            m = document.createElement("div");
+            m.id = "totModal";
+            m.style.cssText = "position:fixed;inset:0;background:rgba(15,23,42,.65);z-index:9999;display:flex;align-items:center;justify-content:center;padding:12px";
+            m.innerHTML = "<div style='background:#fff;color:#1f2937;border-radius:12px;max-width:900px;width:100%;max-height:92vh;overflow:auto;padding:16px'>" +
+                "<h2 style='margin:0 0 10px'>📊 TOTALE ORE, ASSENZE E FESTIVI</h2>" +
+                "<div style='display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px'>Dal <input type='date' id='totDal'> al <input type='date' id='totAl'>" +
+                "<button id='totCalcola'>CALCOLA</button><button id='totExcel' class='btn-salva'>⬇ EXCEL</button><button id='totChiudi' class='btn-chiudi'>CHIUDI</button></div>" +
+                "<div id='totTabella' style='overflow-x:auto'></div>" +
+                "<p style='font-size:12px;color:#64748b'>Assenza = 6:36 · Festivo non lavorato = 6:36 · TOTALE = ore lavorate + assenze + festivi</p></div>";
+            document.body.appendChild(m);
+            var oggi = new Date();
+            document.getElementById("totDal").value = chiave(new Date(oggi.getFullYear(), oggi.getMonth(), 1));
+            document.getElementById("totAl").value = chiave(new Date(oggi.getFullYear(), oggi.getMonth() + 1, 0));
+            document.getElementById("totCalcola").onclick = mostra;
+            document.getElementById("totExcel").onclick = scarica;
+            document.getElementById("totChiudi").onclick = function () { m.style.display = "none"; };
+        }
+        m.style.display = "flex";
+        mostra();
+    }
+
+    /* ---- Totale sotto ai turni (vista operatore / filtro operatore / tutti) ---- */
+    function periodoCorrente() {
+        var oggi = new Date(); oggi.setHours(0, 0, 0, 0);
+        if (modalita === "giorno") {
+            var g = new Date(oggi); g.setDate(g.getDate() + offsetGiorno);
+            return { dal: chiave(g), al: chiave(g), nome: "GIORNO" };
+        }
+        if (modalita === "mese") {
+            var p = new Date(oggi.getFullYear(), oggi.getMonth() + offsetMese, 1);
+            var u = new Date(p.getFullYear(), p.getMonth() + 1, 0);
+            return { dal: chiave(p), al: chiave(u), nome: "MESE" };
+        }
+        var ds = oggi.getDay(), diff = ds === 0 ? -6 : 1 - ds;
+        var lun = new Date(oggi); lun.setDate(lun.getDate() + diff + offsetSettimana * 7);
+        var dom = new Date(lun); dom.setDate(dom.getDate() + 6);
+        return { dal: chiave(lun), al: chiave(dom), nome: "SETTIMANA" };
+    }
+    function aggiungiTotale() {
+        var cont = document.getElementById("risultati");
+        if (!cont || !fileCaricato) { return; }
+        var vecchio = document.getElementById("boxTotaleOre");
+        if (vecchio) { vecchio.remove(); }
+        /* Visibilità: l'amministratore vede tutto; l'operatore solo il proprio totale */
+        var nome = amministratore ? nomeFiltroOperatore() : (modalitaPersonale && operatoreCorrente ? operatoreCorrente : null);
+        if (!amministratore && !nome) { return; }
+        var per = periodoCorrente(), tutti = calcola(per.dal, per.al);
+        var box = document.createElement("div");
+        box.id = "boxTotaleOre";
+        box.style.cssText = "background:#fff;border-radius:14px;margin:18px 0;padding:14px;box-shadow:0 3px 12px rgba(0,0,0,.10)";
+        var tit = "<div style='font-weight:bold;font-size:18px;color:#1e3a8a;margin-bottom:8px'>📊 TOTALE " + per.nome + "</div>";
+        if (nome) {
+            var o = tutti.filter(function (x) { return normalizza(x.nome) === normalizza(nome); })[0];
+            if (!o) { return; }
+            box.innerHTML = tit + "<div style='line-height:1.9'>" +
+                "Ore lavorate: <b>" + hhmm(o.lav) + "</b><br>" +
+                "Assenze (" + o.nAss + "): <b>" + hhmm(o.ass) + "</b>" + (o.dAss.length ? " <span style='color:#9a3412;font-size:13px'>— " + esc(o.dAss.join(", ")) + "</span>" : "") + "<br>" +
+                "Festivi (" + o.nFest + "): <b>" + hhmm(o.fest) + "</b>" + (o.dFest.length ? " <span style='color:#475569;font-size:13px'>— " + o.dFest.join(", ") + "</span>" : "") + "<br>" +
+                "<span style='font-size:18px'>TOTALE: <b>" + hhmm(o.lav + o.ass + o.fest) + "</b></span></div>";
+        } else {
+            var h = "<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:14px'><tr>" +
+                INT.map(function (t) { return "<th style='background:#1e3a8a;color:#fff;padding:6px;text-align:" + (t === "OPERATORE" ? "left" : "center") + "'>" + t + "</th>"; }).join("") + "</tr>";
+            tutti.forEach(function (o) {
+                var r = [o.nome, hhmm(o.lav), o.nAss, hhmm(o.ass), o.nFest, hhmm(o.fest), hhmm(o.lav + o.ass + o.fest)];
+                h += "<tr>" + r.map(function (v, i) { return "<td style='padding:6px;border-bottom:1px solid #e5e7eb;text-align:" + (i === 0 ? "left" : "center") + ";" + (i === 6 ? "font-weight:bold;" : "") + "'>" + esc(v) + "</td>"; }).join("") + "</tr>";
+            });
+            box.innerHTML = tit + h + "</table></div>";
+        }
+        cont.appendChild(box);
+    }
+    var visualizzaOriginale = visualizza;
+    visualizza = function () {
+        visualizzaOriginale.apply(this, arguments);
+        try { aggiungiTotale(); } catch (e) { console.warn("Totale non calcolato", e); }
+    };
+    try { if (fileCaricato) { visualizza(); } } catch (e) {}
+
+    var rif = document.getElementById("btnGestisciPin");
+    if (rif && rif.parentNode) {
+        var b = document.createElement("button");
+        b.className = "btn-admin";
+        b.textContent = "📊 TOTALE ORE";
+        b.addEventListener("click", apri);
+        rif.parentNode.insertBefore(b, rif.nextSibling);
+    }
+})();
+</script>
+
+<script>
+/* ============================================================
+   NOTIFICHE ASSENZE / RICHIESTE
+   - Admin: avviso all'accesso e quando arrivano nuove richieste
+     (anche dopo IMPORTA RICHIESTE DA EXCEL), contatore nel titolo
+     della scheda, notifica del browser e suono.
+   - Operatore: avviso all'accesso se una sua richiesta e' stata
+     APPROVATA o RIFIUTATA dall'ultima volta.
+   Nota: i dati restano in localStorage di questo dispositivo.
+   ============================================================ */
+(function () {
+    var TITOLO_BASE = "TURNI POSTE NAPOLI";
+    var CATEGORIE_ASSENZA = ["FERIE", "104", "MALATTIA", "ALTRA ASSENZA"];
+    var ultimoPendenti = null;
+
+    function pendenti() {
+        return (richieste || []).filter(function (r) { return r.stato === "IN ATTESA"; });
+    }
+
+    function suono() {
+        try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            var o = ctx.createOscillator(), g = ctx.createGain();
+            o.connect(g); g.connect(ctx.destination);
+            o.frequency.value = 880; g.gain.value = 0.08;
+            o.start(); o.stop(ctx.currentTime + 0.25);
+        } catch (e) {}
+    }
+
+    function notificaBrowser(titolo, testo) {
+        try {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(titolo, { body: testo });
+            }
+        } catch (e) {}
+    }
+
+    function banner(testo) {
+        var b = document.getElementById("bannerNotifiche");
+        if (!b) {
+            b = document.createElement("div");
+            b.id = "bannerNotifiche";
+            b.style.cssText = "position:fixed;top:10px;left:50%;transform:translateX(-50%);" +
+                "z-index:10000;background:#dc2626;color:#fff;padding:12px 18px;border-radius:10px;" +
+                "font-weight:bold;box-shadow:0 4px 14px rgba(0,0,0,.3);cursor:pointer;max-width:92%;text-align:center;";
+            b.addEventListener("click", function () { b.style.display = "none"; });
+            document.body.appendChild(b);
+        }
+        b.textContent = "🔔 " + testo;
+        b.style.display = "block";
+        clearTimeout(b._t);
+        b._t = setTimeout(function () { b.style.display = "none"; }, 12000);
+    }
+
+    function riepilogoAdmin() {
+        var p = pendenti();
+        var assenze = p.filter(function (r) { return CATEGORIE_ASSENZA.indexOf(r.tipo) !== -1; });
+        var cambi = p.length - assenze.length;
+        return { tot: p.length, assenze: assenze.length, cambi: cambi };
+    }
+
+    function aggiornaTitolo() {
+        if (!amministratore) { document.title = TITOLO_BASE; return; }
+        var n = pendenti().length;
+        document.title = (n > 0 ? "(" + n + ") " : "") + TITOLO_BASE;
+    }
+
+    /* Avviso all'accesso dell'amministratore */
+    function avvisoAccessoAdmin() {
+        var r = riepilogoAdmin();
+        if (r.tot === 0) { return; }
+        var html = "<p><strong>" + r.assenze + "</strong> richieste di assenza in attesa " +
+            "(ferie, 104, malattia, altre assenze).</p>" +
+            (r.cambi ? "<p><strong>" + r.cambi + "</strong> richieste di cambio turno in attesa.</p>" : "") +
+            "<div class=\"modal-buttons\"><button class=\"btn-richiesta\" " +
+            "onclick=\"chiudiModal();apriRichieste(null);\">📋 APRI RICHIESTE</button></div>";
+        apriModal("🔔 NOTIFICHE ASSENZE", html);
+        notificaBrowser("Turni Poste Napoli", r.tot + " richieste in attesa");
+    }
+
+    /* Avviso all'accesso dell'operatore: esito delle sue richieste */
+    function avvisoAccessoOperatore(nome) {
+        if (!nome) { return; }
+        var chiave = "notifiche_viste_" + nome;
+        var viste = {};
+        try { viste = JSON.parse(localStorage.getItem(chiave) || "{}"); } catch (e) {}
+        var mie = (richieste || []).filter(function (r) { return r.operatore === nome; });
+        var nuove = mie.filter(function (r) {
+            return r.stato !== "IN ATTESA" && viste[r.id] !== r.stato;
+        });
+        mie.forEach(function (r) { viste[r.id] = r.stato; });
+        try { localStorage.setItem(chiave, JSON.stringify(viste)); } catch (e) {}
+        if (!nuove.length) { return; }
+        var html = nuove.map(function (r) {
+            var ok = r.stato === "APPROVATA";
+            return "<p>" + (ok ? "✅" : "❌") + " <strong>" + escapeHtml(r.tipo) + "</strong>" +
+                (r.dal ? " dal " + escapeHtml(r.dal) + " al " + escapeHtml(r.al) : "") +
+                (r.data ? " del " + escapeHtml(r.data) : "") +
+                ": <strong>" + escapeHtml(r.stato) + "</strong></p>";
+        }).join("");
+        apriModal("🔔 ESITO DELLE TUE RICHIESTE", html);
+        suono();
+    }
+
+    /* Aggancio: contatori (si aggiornano dopo ogni modifica/importazione) */
+    var originaleContatori = aggiornaContatoriRichieste;
+    aggiornaContatoriRichieste = function () {
+        originaleContatori.apply(this, arguments);
+        aggiornaTitolo();
+        if (!amministratore) { ultimoPendenti = null; return; }
+        var n = pendenti().length;
+        if (ultimoPendenti !== null && n > ultimoPendenti) {
+            var diff = n - ultimoPendenti;
+            banner(diff + (diff === 1 ? " nuova richiesta in attesa" : " nuove richieste in attesa"));
+            notificaBrowser("Turni Poste Napoli", diff + " nuove richieste in attesa");
+            suono();
+        }
+        ultimoPendenti = n;
+    };
+
+    /* Aggancio: accesso amministratore */
+    var originaleAdmin = entraComeAmministratore;
+    entraComeAmministratore = function () {
+        originaleAdmin.apply(this, arguments);
+        if (amministratore) {
+            ultimoPendenti = pendenti().length;
+            aggiornaTitolo();
+            if ("Notification" in window && Notification.permission === "default") {
+                try { Notification.requestPermission(); } catch (e) {}
+            }
+            avvisoAccessoAdmin();
+        }
+    };
+
+    /* Aggancio: accesso operatore */
+    var originaleOperatore = entraComeOperatorePersonale;
+    entraComeOperatorePersonale = function (nome) {
+        originaleOperatore.apply(this, arguments);
+        setTimeout(function () { avvisoAccessoOperatore(nome); }, 400);
+    };
+
+    /* Se un'altra scheda dello stesso browser modifica le richieste, ricarica e avvisa */
+    window.addEventListener("storage", function (e) {
+        if (e.key !== CHIAVE_RICHIESTE || !amministratore) { return; }
+        try {
+            richieste = JSON.parse(e.newValue || "[]");
+            aggiornaContatoriRichieste();
+        } catch (err) {}
+    });
+})();
+</script>
+
+<script>
+/* ============================================================
+   INVIO RICHIESTE AL FOGLIO GOOGLE (Apps Script)
+   Incolla qui sotto l'URL ottenuto da "Distribuisci" in Apps Script.
+   Se resta vuoto, la pagina funziona come prima.
+   ============================================================ */
+const URL_INVIO_RICHIESTE = "https://script.google.com/macros/s/AKfycbygnb6tEsN3-lSnpZJHoysNJFPpQxB-m-RHEvNEhepxyZ21uMth3Gyisoh_b72CBiEcqQ/exec";
+
+(function () {
+    var CH = "sync_richieste_stati";
+    function letti() { try { return JSON.parse(localStorage.getItem(CH) || "{}"); } catch (e) { return {}; } }
+    function scrivi(o) { try { localStorage.setItem(CH, JSON.stringify(o)); } catch (e) {} }
+
+    function invia(azione, lista, fatto) {
+        if (!URL_INVIO_RICHIESTE || !lista.length) { return; }
+        fetch(URL_INVIO_RICHIESTE, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ azione: azione, richieste: lista })
+        }).then(fatto).catch(function () {});
+    }
+
+    function sincronizza() {
+        if (!URL_INVIO_RICHIESTE) { return; }
+        var stati = letti();
+        var righe = richiesteComeRighe();
+        var nuove = righe.filter(function (r) {
+            if (stati[r.ID] !== undefined) { return false; }
+            /* l'operatore invia solo le proprie; l'amministratore tutte */
+            return amministratore || r.OPERATORE === operatoreCorrente;
+        });
+        var cambiate = righe.filter(function (r) {
+            return amministratore && stati[r.ID] !== undefined && stati[r.ID] !== r.STATO;
+        });
+        invia("nuova", nuove, function () {
+            var s = letti(); nuove.forEach(function (r) { s[r.ID] = r.STATO; }); scrivi(s);
+        });
+        invia("aggiorna", cambiate, function () {
+            var s = letti(); cambiate.forEach(function (r) { s[r.ID] = r.STATO; }); scrivi(s);
+        });
+    }
+
+    var originale = salvaRichiesteLocali;
+    salvaRichiesteLocali = function () {
+        originale.apply(this, arguments);
+        sincronizza();
+    };
+})();
+</script>
+
+<script>
+/* ============================================================
+   PIN OPERATORI ONLINE (Firebase Firestore)
+   Incolla qui il blocco firebaseConfig di Firebase, cosi':
+   const FIREBASE_CONFIG = { apiKey: "...", projectId: "...", ... };
+   Se resta null, i PIN funzionano come prima (solo su questo dispositivo).
+   Quando e' attivo: cambi un PIN e vale subito su tutti i dispositivi,
+   senza scaricare/ricaricare operatori.json.
+   ============================================================ */
+const FIREBASE_CONFIG = null;
+
+(function () {
+    if (!FIREBASE_CONFIG || !FIREBASE_CONFIG.projectId) { return; }
+
+    var VERSIONE = "10.12.2";
+    var BASE = "https://www.gstatic.com/firebasejs/" + VERSIONE + "/";
+    var db = null;
+
+    function carica(src) {
+        return new Promise(function (ok, ko) {
+            var s = document.createElement("script");
+            s.src = src; s.onload = ok; s.onerror = ko;
+            document.head.appendChild(s);
+        });
+    }
+
+    function riferimento() { return db.collection("config").doc("operatori"); }
+
+    function leggiLocale() { try { return getOperatoriPin(); } catch (e) { return []; } }
+
+    function applicaOnline(json) {
+        try {
+            var lista = JSON.parse(json);
+            if (!Array.isArray(lista)) { return; }
+            localStorage.setItem(CHIAVE_OPERATORI, JSON.stringify(lista));
+            if (typeof aggiornaSelectOperatori === "function") { try { aggiornaSelectOperatori(); } catch (e) {} }
+        } catch (e) {}
+    }
+
+    function pubblica(lista) {
+        if (!db) { return; }
+        riferimento().set({ json: JSON.stringify(lista), aggiornato: new Date().toISOString() })
+            .catch(function () { alert("PIN salvati solo su questo dispositivo: Firebase non risponde."); });
+    }
+
+    carica(BASE + "firebase-app-compat.js")
+        .then(function () { return carica(BASE + "firebase-firestore-compat.js"); })
+        .then(function () {
+            firebase.initializeApp(FIREBASE_CONFIG);
+            db = firebase.firestore();
+
+            /* ogni salvataggio dei PIN va anche online */
+            var originale = salvaOperatoriPin;
+            salvaOperatoriPin = function (lista) {
+                originale.apply(this, arguments);
+                pubblica(lista);
+            };
+
+            /* leggo i PIN online (con un breve ritardo, dopo il caricamento della pagina) */
+            setTimeout(function () {
+                riferimento().get().then(function (doc) {
+                    if (doc.exists) {
+                        applicaOnline(doc.data().json);
+                    }
+                    /* aggiornamenti in tempo reale (altri dispositivi) */
+                    riferimento().onSnapshot(function (d) {
+                        if (d.exists && !d.metadata.hasPendingWrites) { applicaOnline(d.data().json); }
+                    });
+                }).catch(function () {});
+            }, 1500);
+
+            /* primo avvio: se online non c'e' nulla, l'amministratore carica i PIN che ha qui */
+            var originaleAdmin = entraComeAmministratore;
+            entraComeAmministratore = function () {
+                originaleAdmin.apply(this, arguments);
+                if (!amministratore) { return; }
+                riferimento().get().then(function (doc) {
+                    var locale = leggiLocale();
+                    if (!doc.exists && locale.length) { pubblica(locale); }
+                }).catch(function () {});
+            };
+        })
+        .catch(function () { console.warn("Firebase non caricato: PIN solo locali."); });
+})();
+</script>
+
+<script>
+/* ============================================================
+   L'OPERATORE CAMBIA IL PROPRIO PIN
+   ============================================================ */
+(function () {
+    function apriCambioMioPin() {
+        if (!operatoreCorrente) { return; }
+        var avviso = (typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG)
+            ? ""
+            : "<p style='color:#b45309;font-weight:bold;'>Attenzione: il nuovo PIN vale solo su questo dispositivo. " +
+              "Per averlo ovunque deve essere attivo Firebase.</p>";
+        apriModal("🔑 CAMBIA IL MIO PIN",
+            avviso +
+            "<div class='form-grid'>" +
+            "<div class='form-group'><label>PIN attuale</label>" +
+            "<input id='mpAttuale' type='password' inputmode='numeric' maxlength='6' autocomplete='off'></div>" +
+            "<div class='form-group'><label>Nuovo PIN (da 4 a 6 cifre)</label>" +
+            "<input id='mpNuovo' type='password' inputmode='numeric' maxlength='6' autocomplete='off'></div>" +
+            "<div class='form-group'><label>Ripeti il nuovo PIN</label>" +
+            "<input id='mpConferma' type='password' inputmode='numeric' maxlength='6' autocomplete='off'></div>" +
+            "</div><div class='modal-buttons'>" +
+            "<button class='btn-salva' onclick='salvaMioPin()'>💾 SALVA IL NUOVO PIN</button></div>");
+    }
+
+    window.salvaMioPin = function () {
+        var att = testo(document.getElementById("mpAttuale").value);
+        var nuovo = testo(document.getElementById("mpNuovo").value);
+        var conf = testo(document.getElementById("mpConferma").value);
+        var lista = getOperatoriPin();
+        var io = lista.find(function (op) { return normalizza(op.nome) === normalizza(operatoreCorrente); });
+        if (!io || io.pin !== att) { alert("Il PIN attuale non è corretto."); return; }
+        if (!/^[0-9]{4,6}$/.test(nuovo)) { alert("Il nuovo PIN deve avere da 4 a 6 cifre, solo numeri."); return; }
+        if (nuovo !== conf) { alert("I due nuovi PIN non coincidono."); return; }
+        if (nuovo === att) { alert("Il nuovo PIN deve essere diverso da quello attuale."); return; }
+        io.pin = nuovo;
+        salvaOperatoriPin(lista);
+        chiudiModal();
+        alert("PIN cambiato. Dal prossimo accesso usa il nuovo PIN.");
+    };
+
+    var originale = entraComeOperatorePersonale;
+    entraComeOperatorePersonale = function (nome) {
+        originale.apply(this, arguments);
+        setTimeout(function () {
+            var riga = document.getElementById("rigaRichiesteOperatore");
+            if (riga && !document.getElementById("btnCambiaMioPin")) {
+                var b = document.createElement("button");
+                b.id = "btnCambiaMioPin";
+                b.className = "btn-chiudi";
+                b.textContent = "🔑 CAMBIA IL MIO PIN";
+                b.addEventListener("click", apriCambioMioPin);
+                riga.appendChild(b);
+            }
+        }, 100);
+    };
+})();
+</script>
+
+</body>
+
+</html>
